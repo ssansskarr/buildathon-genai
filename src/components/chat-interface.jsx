@@ -16,6 +16,8 @@ const useFlaskChat = () => {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [controller, setController] = useState(null)
+  const [isInterruptible, setIsInterruptible] = useState(false)
 
   const handleInputChange = (e) => {
     setInput(e.target.value)
@@ -32,6 +34,11 @@ const useFlaskChat = () => {
     setIsLoading(true)
 
     try {
+      // Create an AbortController to allow cancelling the request
+      const abortController = new AbortController()
+      setController(abortController)
+      setIsInterruptible(true)
+
       // Call Flask backend API
       const response = await fetch("http://localhost:5000/api/chat", {
         method: "POST",
@@ -39,6 +46,7 @@ const useFlaskChat = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ messages: [...messages, userMessage] }),
+        signal: abortController.signal
       })
 
       const data = await response.json()
@@ -62,18 +70,34 @@ const useFlaskChat = () => {
         ])
       }
     } catch (error) {
-      console.error("Failed to fetch from Flask backend:", error)
-      // Add error message
-      setMessages((prev) => [
-        ...prev,
-        { 
-          id: (Date.now() + 1).toString(), 
-          role: "assistant", 
-          content: "Sorry, I couldn't connect to the backend service. Please check if the Flask server is running." 
-        }
-      ])
+      // Don't show error message if the request was aborted intentionally
+      if (error.name === 'AbortError') {
+        console.log('Request was aborted')
+      } else {
+        console.error("Failed to fetch from Flask backend:", error)
+        // Add error message
+        setMessages((prev) => [
+          ...prev,
+          { 
+            id: (Date.now() + 1).toString(), 
+            role: "assistant", 
+            content: "Sorry, I couldn't connect to the backend service. Please check if the Flask server is running." 
+          }
+        ])
+      }
     } finally {
       setIsLoading(false)
+      setController(null)
+      setIsInterruptible(false)
+    }
+  }
+
+  const interruptResponse = () => {
+    if (controller) {
+      controller.abort()
+      setIsLoading(false)
+      setController(null)
+      setIsInterruptible(false)
     }
   }
 
@@ -81,8 +105,10 @@ const useFlaskChat = () => {
     messages,
     input,
     isLoading,
+    isInterruptible,
     handleInputChange,
     handleSubmit,
+    interruptResponse,
     setMessages
   }
 }
@@ -96,9 +122,21 @@ export default function ChatInterface() {
   const [currentChatId, setCurrentChatId] = useState(null)
   const [sidebarWidth, setSidebarWidth] = useState(288) // Default width (72 * 4 = 288px)
   const [isResizing, setIsResizing] = useState(false)
+  const [textDisplayMode, setTextDisplayMode] = useState('truncate') // 'truncate', 'wrap', or 'normal'
+  const [isTyping, setIsTyping] = useState(false) // Track if the typewriter is currently typing
+  const [interruptTyping, setInterruptTyping] = useState(false) // State to trigger interruption
   
   // Use our custom Flask chat hook instead of the AI SDK hook
-  const { messages, input, handleInputChange, handleSubmit, isLoading, setMessages } = useFlaskChat()
+  const { 
+    messages, 
+    input, 
+    handleInputChange, 
+    handleSubmit, 
+    isLoading, 
+    isInterruptible,
+    interruptResponse,
+    setMessages 
+  } = useFlaskChat()
   const messagesEndRef = useRef(null)
   const scrollAreaRef = useRef(null)
   const sidebarRef = useRef(null)
@@ -326,20 +364,29 @@ export default function ChatInterface() {
   const handleMouseDown = (e) => {
     e.preventDefault()
     setIsResizing(true)
+    document.body.style.cursor = 'ew-resize'
   }
   
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (!isResizing) return
       
-      const newWidth = e.clientX
-      if (newWidth >= 240 && newWidth <= 400) {
-        setSidebarWidth(newWidth)
+      const newWidth = Math.max(260, Math.min(e.clientX, 420))
+      setSidebarWidth(newWidth)
+      
+      // Update text display mode based on sidebar width
+      if (newWidth < 300) {
+        setTextDisplayMode('wrap')
+      } else if (newWidth < 350) {
+        setTextDisplayMode('truncate')
+      } else {
+        setTextDisplayMode('normal')
       }
     }
     
     const handleMouseUp = () => {
       setIsResizing(false)
+      document.body.style.cursor = ''
       localStorage.setItem('sidebarWidth', sidebarWidth.toString())
     }
     
@@ -351,8 +398,47 @@ export default function ChatInterface() {
     return () => {
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
+      document.body.style.cursor = ''
     }
   }, [isResizing, sidebarWidth])
+  
+  // Set initial text display mode based on sidebar width
+  useEffect(() => {
+    if (sidebarWidth < 300) {
+      setTextDisplayMode('wrap')
+    } else if (sidebarWidth < 350) {
+      setTextDisplayMode('truncate')
+    } else {
+      setTextDisplayMode('normal')
+    }
+  }, [])
+
+  // Handle typewriter completion
+  const handleTypewriterComplete = (wasInterrupted) => {
+    setIsTyping(false)
+    setInterruptTyping(false)
+    
+    // If it was interrupted, we don't need to do anything special
+    // The typewriter component will have preserved the text displayed so far
+  }
+  
+  // Handle interrupt button click
+  const handleInterrupt = () => {
+    // Interrupt the backend request if it's still in progress
+    if (isInterruptible) {
+      interruptResponse()
+    }
+    
+    // Interrupt the typewriter animation
+    setInterruptTyping(true)
+  }
+  
+  // Set isTyping to true when a new AI message is added
+  useEffect(() => {
+    if (messages.length > 0 && messages[messages.length - 1].role === 'assistant') {
+      setIsTyping(true)
+    }
+  }, [messages.length])
 
   return (
     <div className="flex h-screen bg-[#0f0f0f] text-white">
@@ -418,7 +504,7 @@ export default function ChatInterface() {
       <div
         ref={sidebarRef}
         style={{ width: sidebarOpen ? `${sidebarWidth}px` : '0px' }}
-        className={`relative flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden bg-[#0f0f0f]/90 backdrop-blur-md border-r border-[#2a2a2a]/50 shadow-xl z-20`}
+        className={`relative flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden bg-[#0f0f0f]/90 backdrop-blur-md border-r border-[#2a2a2a]/50 shadow-xl z-20 ${isResizing ? 'transition-none' : ''}`}
       >
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
@@ -454,12 +540,17 @@ export default function ChatInterface() {
                       <div className="w-8 h-8 rounded-full bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
                         <Sparkles className="h-4 w-4 text-emerald-400" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate mb-1">{chat.title || "New Chat"}</p>
-                        <p className="text-xs text-gray-400 truncate">{chat.preview || "No messages yet"}</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          <span className="text-xs text-gray-500">{chat.time}</span>
-                          <div className="flex-1"></div>
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <div className="flex items-center pr-6 relative">
+                          <p className={`text-sm font-medium text-white ${
+                            textDisplayMode === 'wrap' 
+                              ? 'break-words' 
+                              : textDisplayMode === 'truncate' 
+                                ? 'truncate' 
+                                : ''
+                          }`}>
+                            {chat.title || "New Chat"}
+                          </p>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -467,10 +558,22 @@ export default function ChatInterface() {
                               e.stopPropagation();
                               setShowDeleteConfirm(chat.id);
                             }}
-                            className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0 hover:bg-red-500/20 hover:text-red-400 transition-all rounded-full"
+                            className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0 hover:bg-red-500/20 hover:text-red-400 transition-all rounded-full absolute right-0 top-0"
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
+                        </div>
+                        <p className={`text-xs text-gray-400 ${
+                          textDisplayMode === 'wrap' 
+                            ? 'break-words' 
+                            : textDisplayMode === 'truncate' 
+                              ? 'truncate' 
+                              : ''
+                        }`}>
+                          {chat.preview || "No messages yet"}
+                        </p>
+                        <div className="flex items-center gap-1 mt-1">
+                          <span className="text-xs text-gray-500">{chat.time}</span>
                         </div>
                       </div>
                     </div>
@@ -483,13 +586,25 @@ export default function ChatInterface() {
           {/* Sidebar Footer */}
           <div className="p-4 border-t border-[#2a2a2a]/50 bg-[#0f0f0f]/50 backdrop-blur-md sticky bottom-0 z-10">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#2a2a2a] cursor-pointer">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
+              <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-[#2a2a2a] cursor-pointer overflow-hidden">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center flex-shrink-0">
                   <Sparkles className="h-4 w-4 text-white" />
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">AI Chat</p>
-                  <p className="text-xs text-gray-400">Powered by Gemini</p>
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <p className={`text-sm font-medium ${
+                    textDisplayMode === 'wrap' 
+                      ? 'break-words' 
+                      : textDisplayMode === 'truncate' 
+                        ? 'truncate' 
+                        : ''
+                  }`}>AI Chat</p>
+                  <p className={`text-xs text-gray-400 ${
+                    textDisplayMode === 'wrap' 
+                      ? 'break-words' 
+                      : textDisplayMode === 'truncate' 
+                        ? 'truncate' 
+                        : ''
+                  }`}>Powered by Gemini</p>
                 </div>
               </div>
               {chatHistory.length > 0 && (
@@ -497,7 +612,7 @@ export default function ChatInterface() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowDeleteConfirm('all')}
-                  className="h-9 px-3 text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all flex items-center gap-2"
+                  className="h-9 px-3 text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all flex items-center gap-2 flex-shrink-0"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -509,10 +624,10 @@ export default function ChatInterface() {
         {/* Resize Handle */}
         {sidebarOpen && (
           <div
-            className="absolute top-0 right-0 w-1 h-full cursor-ew-resize hover:bg-emerald-500/50 group"
+            className="absolute top-0 right-0 w-4 h-full cursor-ew-resize hover:bg-emerald-500/20 group z-30"
             onMouseDown={handleMouseDown}
           >
-            <div className="absolute top-1/2 right-0 h-8 w-1 -translate-y-1/2 bg-[#2a2a2a]/50 group-hover:bg-emerald-500 transition-colors"></div>
+            <div className="absolute top-1/2 right-1 h-20 w-1 -translate-y-1/2 bg-[#2a2a2a]/70 group-hover:bg-emerald-500 transition-colors rounded-full"></div>
           </div>
         )}
       </div>
@@ -615,12 +730,30 @@ export default function ChatInterface() {
                             <Sparkles className="h-4 w-4 text-white" />
                           </div>
                           <div className="flex-1">
-                            <div className="flex items-center mb-1">
+                            <div className="flex items-center mb-1 justify-between">
                               <span className="text-sm font-medium text-white">AI Cost Optimizer</span>
+                              {idx === messages.length - 1 && isTyping && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={handleInterrupt}
+                                  className="h-7 px-3 text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all rounded-full"
+                                >
+                                  <span className="text-xs mr-1">Stop generating</span>
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-square">
+                                    <rect width="18" height="18" x="3" y="3" rx="2" />
+                                  </svg>
+                                </Button>
+                              )}
                             </div>
                             <div className="markdown-content text-gray-200 leading-relaxed">
                               {idx === messages.length - 1 ? (
-                                <TypeWriter text={message.content} speed={10} />
+                                <TypeWriter 
+                                  text={message.content} 
+                                  speed={10} 
+                                  isInterrupted={interruptTyping}
+                                  onComplete={handleTypewriterComplete}
+                                />
                               ) : (
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                   {message.content}

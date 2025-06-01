@@ -1,33 +1,70 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
-export default function TypeWriter({ text, speed = 10 }) {
+export default function TypeWriter({ text, speed = 10, isInterrupted = false, onComplete = () => {} }) {
   const [displayText, setDisplayText] = useState("")
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isComplete, setIsComplete] = useState(false)
+  const timeoutRef = useRef(null)
+  const wasInterruptedRef = useRef(false)
 
+  // Reset when text changes
   useEffect(() => {
-    // Reset when text changes
     setDisplayText("")
     setCurrentIndex(0)
     setIsComplete(false)
+    wasInterruptedRef.current = false
+    
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
   }, [text])
 
+  // Handle interruption
   useEffect(() => {
+    if (isInterrupted && !isComplete && !wasInterruptedRef.current) {
+      // Mark as interrupted to prevent further typing
+      wasInterruptedRef.current = true
+      
+      // Clear any pending timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+      
+      // Mark as complete since we're stopping here
+      setIsComplete(true)
+      onComplete(true) // Notify parent that typing was interrupted
+    }
+  }, [isInterrupted, isComplete, onComplete])
+
+  // Handle typing animation
+  useEffect(() => {
+    // Don't continue if interrupted
+    if (wasInterruptedRef.current) {
+      return
+    }
+    
     if (currentIndex < text.length) {
-      const timeout = setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         setDisplayText(prev => prev + text[currentIndex])
         setCurrentIndex(prevIndex => prevIndex + 1)
       }, speed)
       
-      return () => clearTimeout(timeout)
-    } else {
+      return () => {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current)
+        }
+      }
+    } else if (!isComplete) {
       setIsComplete(true)
+      onComplete(false) // Notify parent that typing completed normally
     }
-  }, [currentIndex, text, speed])
+  }, [currentIndex, text, speed, isComplete, onComplete])
 
   return (
     <div className="typewriter-container">
