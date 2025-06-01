@@ -112,9 +112,100 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light theme variables */
+    --background: 0 0% 100%; /* White */
+    --foreground: 240 10% 3.9%; /* Dark text */
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 240 10% 3.9%; /* Dark text */
+    --popover: 0 0% 100%; /* White */
+    --popover-foreground: 240 10% 3.9%; /* Dark text */
+    --primary: 210 100% 50%; /* Blue */
+    --primary-foreground: 355.7 100% 97.3%; /* White text */
+    --secondary: 240 4.8% 95.9%; /* Light gray */
+    --secondary-foreground: 240 5.9% 10%; /* Dark text */
+    --muted: 240 4.8% 95.9%; /* Light gray */
+    --muted-foreground: 240 3.8% 46.1%; /* Medium gray text */
+    --accent: 240 4.8% 95.9%; /* Light gray */
+    --accent-foreground: 240 5.9% 10%; /* Dark text */
+    --destructive: 0 84.2% 60.2%; /* Red */
+    --destructive-foreground: 0 0% 98%; /* White text */
+    --border: 240 5.9% 90%; /* Light gray border */
+    --input: 240 5.9% 90%; /* Light gray input */
+    --ring: 210 100% 50%; /* Blue */
+    --radius: 0.5rem;
+    
+    /* Custom theme colors for light mode */
+    --app-background: 0 0% 100%; /* White */
+    --app-foreground: 240 10% 3.9%; /* Dark text */
+    --sidebar-background: 0 0% 98%; /* Off-white */
+    --sidebar-foreground: 240 10% 3.9%; /* Dark text */
+    --sidebar-border: 240 5.9% 90%; /* Light gray border */
+    --chat-background: 0 0% 100%; /* White */
+    --chat-user-bubble: 240 5% 96%; /* Light gray bubble */
+    --chat-ai-bubble: 210 100% 96%; /* Light blue bubble */
+    --input-background: 240 5% 96%; /* Light gray input */
+    --input-border: 240 5.9% 90%; /* Light gray border */
+    --button-primary: 210 100% 50%; /* Blue */
+    --button-primary-hover: 210 100% 45%; /* Darker blue */
+    --button-secondary: 240 5% 96%; /* Light gray */
+    --button-secondary-hover: 240 5% 90%; /* Darker light gray */
+    --card-background: 0 0% 100%; /* White */
+    --card-border: 240 5.9% 90%; /* Light gray border */
+    --card-hover: 240 5% 96%; /* Light gray hover */
+  }
+
+  .dark {
+    /* Dark theme blue colors matching landing page */
+    --background: 220 30% 10%; /* #0a101f - Dark blue background */
+    --foreground: 0 0% 98%; /* White text */
+    --card: 220 30% 10%; /* #0a101f - Dark blue background */
+    --card-foreground: 0 0% 98%; /* White text */
+    --popover: 220 30% 10%; /* #0a101f - Dark blue background */
+    --popover-foreground: 0 0% 98%; /* White text */
+    --primary: 210 100% 50%; /* Blue */
+    --primary-foreground: 0 0% 98%; /* White text */
+    --secondary: 220 25% 15%; /* #1a2035 - Dark blue secondary */
+    --secondary-foreground: 0 0% 98%; /* White text */
+    --muted: 220 25% 15%; /* #1a2035 - Dark blue muted */
+    --muted-foreground: 240 5% 64.9%; /* Gray text */
+    --accent: 220 25% 15%; /* #1a2035 - Dark blue accent */
+    --accent-foreground: 0 0% 98%; /* White text */
+    --destructive: 0 62.8% 30.6%; /* Dark red */
+    --destructive-foreground: 0 0% 98%; /* White text */
+    --border: 220 20% 20%; /* #2a3050 - Dark blue border */
+    --input: 220 20% 20%; /* #2a3050 - Dark blue input */
+    --ring: 210 100% 50%; /* Blue */
+    
+    /* Custom theme colors for dark mode - blue theme */
+    --app-background: 220 30% 10%; /* #0a101f - Dark blue background */
+    --app-foreground: 0 0% 98%; /* White text */
+    --sidebar-background: 220 30% 10%; /* #0a101f - Dark blue background */
+    --sidebar-foreground: 0 0% 98%; /* White text */
+    --sidebar-border: 220 20% 20%; /* #2a3050 - Dark blue border */
+    --chat-background: 220 30% 10%; /* #0a101f - Dark blue background */
+    --chat-user-bubble: 220 25% 15%; /* #1a2035 - Dark blue bubble */
+    --chat-ai-bubble: 210 70% 15%; /* Dark blue bubble */
+    --input-background: 220 30% 8%; /* #050a15 - Darker blue input */
+    --input-border: 220 20% 20%; /* #2a3050 - Dark blue border */
+    --button-primary: 210 100% 50%; /* Blue */
+    --button-primary-hover: 210 100% 45%; /* Darker blue */
+    --button-secondary: 220 25% 15%; /* #1a2035 - Dark blue secondary */
+    --button-secondary-hover: 220 25% 20%; /* Lighter dark blue secondary */
+    --card-background: 220 30% 10%; /* #0a101f - Dark blue background */
+    --card-border: 220 20% 20%; /* #2a3050 - Dark blue border */
+    --card-hover: 220 25% 15%; /* #1a2035 - Dark blue hover */
+  }
+}
+
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
@@ -123,7 +214,7 @@
 
 /* Add styles for markdown content */
 .markdown-content {
-  @apply text-gray-200;
+  @apply text-foreground;
 }
 
 .markdown-content h1 {
@@ -163,42 +254,40 @@
 }
 
 .markdown-content pre {
-  @apply bg-[#1a1a1a] p-4 rounded-lg my-4 overflow-x-auto;
+  @apply bg-gray-800 p-4 rounded-md my-4 overflow-x-auto;
 }
 
 .markdown-content code {
-  @apply bg-[#1a1a1a] px-1 py-0.5 rounded;
+  @apply bg-gray-800 px-1 py-0.5 rounded-md text-sm;
 }
 
 /* Improved table styling */
 .markdown-content table {
-  @apply w-full border-collapse my-4 overflow-x-auto block;
-  max-width: 100%;
+  @apply w-full border-collapse my-4;
 }
 
 .markdown-content thead {
-  @apply bg-[#1a1a1a];
+  @apply bg-gray-800;
 }
 
 .markdown-content th {
-  @apply bg-[#1a1a1a] font-bold px-4 py-2 border border-[#2a2a2a] text-left;
+  @apply px-4 py-2 text-left;
 }
 
 .markdown-content td {
-  @apply border border-[#2a2a2a] px-4 py-2;
-  word-break: normal;
+  @apply px-4 py-2 border-t border-gray-700;
 }
 
 .markdown-content tr {
-  @apply border-b border-[#2a2a2a];
+  @apply border-b border-gray-700;
 }
 
 .markdown-content tr:nth-child(even) {
-  @apply bg-[#171717];
+  @apply bg-gray-800/30;
 }
 
 .markdown-content hr {
-  @apply border-[#2a2a2a] my-6;
+  @apply my-8 border-gray-700;
 }
 
 /* Typing animation */
@@ -240,4 +329,38 @@
     transform: translateY(-6px);
     opacity: 1;
   }
+}
+
+/* Custom animation classes */
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+@keyframes slide-up-stagger {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up-stagger {
+  animation: slide-up-stagger 0.5s ease-out forwards;
+}
+
+.animate-slide-up-delay {
+  animation: slide-up-stagger 0.5s ease-out 0.2s forwards;
+  opacity: 0;
 }

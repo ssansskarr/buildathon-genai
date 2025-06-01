@@ -10,6 +10,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import Link from "next/link"
 import TypeWriter from "@/components/type-writer"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 // Custom hook for chat functionality
 const useFlaskChat = () => {
@@ -323,19 +324,19 @@ export default function ChatInterface() {
   const suggestions = [
     {
       text: "Help me calculate the ROI for implementing AI agents in customer service",
-      icon: <Zap className="h-5 w-5 text-emerald-400" />
+      icon: <Zap className="h-5 w-5 text-blue-400" />
     },
     {
       text: "Compare the costs of different LLMs for our use case",
-      icon: <Settings className="h-5 w-5 text-emerald-400" />
+      icon: <Settings className="h-5 w-5 text-blue-400" />
     },
     {
       text: "What are the best practices for reducing AI operational costs?",
-      icon: <Sparkles className="h-5 w-5 text-emerald-400" />
+      icon: <Sparkles className="h-5 w-5 text-blue-400" />
     },
     {
       text: "How can I optimize my AI agent architecture to minimize costs?",
-      icon: <Zap className="h-5 w-5 text-emerald-400" />
+      icon: <Zap className="h-5 w-5 text-blue-400" />
     },
   ]
 
@@ -441,31 +442,31 @@ export default function ChatInterface() {
   }, [messages.length])
 
   return (
-    <div className="flex h-screen bg-[#0f0f0f] text-white">
+    <div className="flex h-screen bg-background text-foreground">
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJncmlkIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPjxwYXRoIGQ9Ik0gNDAgMCBMIDAgMCAwIDQwIiBmaWxsPSJub25lIiBzdHJva2U9IiMxMWIzODEiIHN0cm9rZS13aWR0aD0iMC4yIiBvcGFjaXR5PSIwLjAzIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIiAvPjwvc3ZnPg==')] opacity-30"></div>
-        <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-gradient-to-b from-emerald-900/5 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-gradient-to-t from-emerald-900/5 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJncmlkIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPjxwYXRoIGQ9Ik0gNDAgMCBMIDAgMCAwIDQwIiBmaWxsPSJub25lIiBzdHJva2U9IiMzMDgyZWQiIHN0cm9rZS13aWR0aD0iMC4yIiBvcGFjaXR5PSIwLjAzIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIiAvPjwvc3ZnPg==')] opacity-30"></div>
+        <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-gradient-to-b from-blue-900/5 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-gradient-to-t from-blue-900/5 to-transparent rounded-full blur-3xl"></div>
       </div>
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-          <div className="bg-[#171717] border border-[#2a2a2a]/70 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl shadow-emerald-900/10 animate-scale-in">
+          <div className="bg-card border border-border rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl shadow-blue-900/10 animate-scale-in">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
                 <Trash2 className="h-5 w-5 text-red-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-white">Delete Chat</h3>
-                <p className="text-sm text-gray-400">
+                <h3 className="font-semibold text-foreground">Delete Chat</h3>
+                <p className="text-sm text-muted-foreground">
                   {showDeleteConfirm === 'current' ? 'Clear current conversation?' : 
                    showDeleteConfirm === 'all' ? 'Delete all conversations?' : 'Delete this conversation?'}
                 </p>
               </div>
             </div>
-            <p className="text-gray-300 mb-6">
+            <p className="text-foreground mb-6">
               {showDeleteConfirm === 'current' 
                 ? 'This will clear all messages in the current conversation. This action cannot be undone.'
                 : showDeleteConfirm === 'all'
@@ -477,7 +478,7 @@ export default function ChatInterface() {
               <Button
                 variant="outline"
                 onClick={() => setShowDeleteConfirm(null)}
-                className="flex-1 border-[#2a2a2a] bg-transparent hover:bg-[#2a2a2a] text-white"
+                className="flex-1 border-border bg-transparent hover:bg-secondary text-foreground"
               >
                 Cancel
               </Button>
@@ -504,14 +505,14 @@ export default function ChatInterface() {
       <div
         ref={sidebarRef}
         style={{ width: sidebarOpen ? `${sidebarWidth}px` : '0px' }}
-        className={`relative flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden bg-[#0f0f0f]/90 backdrop-blur-md border-r border-[#2a2a2a]/50 shadow-xl z-20 ${isResizing ? 'transition-none' : ''}`}
+        className={`relative flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden bg-card backdrop-blur-md border-r border-border shadow-xl z-20 ${isResizing ? 'transition-none' : ''}`}
       >
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
-          <div className="p-4 border-b border-[#2a2a2a]/50 bg-[#0f0f0f]/50 backdrop-blur-md sticky top-0 z-10">
+          <div className="p-4 border-b border-border bg-card/90 backdrop-blur-md sticky top-0 z-10">
             <Button 
               onClick={handleNewChat}
-              className="w-full justify-start gap-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white border-none rounded-lg h-11 font-medium transition-all shadow-lg shadow-emerald-900/20"
+              className="w-full justify-start gap-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white border-none rounded-lg h-11 font-medium transition-all shadow-lg shadow-blue-900/20"
             >
               <Plus className="h-4 w-4" />
               New chat
@@ -522,27 +523,27 @@ export default function ChatInterface() {
           <ScrollArea className="flex-1 p-2 overflow-y-auto">
             <div className="space-y-1">
               {chatHistory.length === 0 ? (
-                <div className="p-8 text-center text-gray-500 text-sm flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-full bg-[#1a1a1a] flex items-center justify-center mb-3">
-                    <Sparkles className="h-5 w-5 text-gray-400" />
+                <div className="p-8 text-center text-muted-foreground text-sm flex flex-col items-center">
+                  <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mb-3">
+                    <Sparkles className="h-5 w-5 text-muted-foreground" />
                   </div>
                   No chat history yet
-                  <p className="text-xs text-gray-600 mt-2">Your conversations will appear here</p>
+                  <p className="text-xs text-muted-foreground mt-2">Your conversations will appear here</p>
                 </div>
               ) : (
                 chatHistory.map((chat) => (
                   <div
                     key={chat.id}
-                    className={`group relative p-3 rounded-lg hover:bg-[#2a2a2a] cursor-pointer transition-all ${chat.id === currentChatId ? 'bg-[#2a2a2a]/70 border-l-2 border-emerald-500' : ''}`}
+                    className={`group relative p-3 rounded-lg hover:bg-secondary cursor-pointer transition-all ${chat.id === currentChatId ? 'bg-secondary/70 border-l-2 border-primary' : ''}`}
                     onClick={() => handleLoadChat(chat.id)}
                   >
                     <div className="flex items-start gap-2">
-                      <div className="w-8 h-8 rounded-full bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
-                        <Sparkles className="h-4 w-4 text-emerald-400" />
+                      <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+                        <Sparkles className="h-4 w-4 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0 overflow-hidden">
                         <div className="flex items-center pr-6 relative">
-                          <p className={`text-sm font-medium text-white ${
+                          <p className={`text-sm font-medium text-foreground ${
                             textDisplayMode === 'wrap' 
                               ? 'break-words' 
                               : textDisplayMode === 'truncate' 
@@ -563,7 +564,7 @@ export default function ChatInterface() {
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </div>
-                        <p className={`text-xs text-gray-400 ${
+                        <p className={`text-xs text-muted-foreground ${
                           textDisplayMode === 'wrap' 
                             ? 'break-words' 
                             : textDisplayMode === 'truncate' 
@@ -573,7 +574,7 @@ export default function ChatInterface() {
                           {chat.preview || "No messages yet"}
                         </p>
                         <div className="flex items-center gap-1 mt-1">
-                          <span className="text-xs text-gray-500">{chat.time}</span>
+                          <span className="text-xs text-muted-foreground">{chat.time}</span>
                         </div>
                       </div>
                     </div>
@@ -584,10 +585,10 @@ export default function ChatInterface() {
           </ScrollArea>
 
           {/* Sidebar Footer */}
-          <div className="p-4 border-t border-[#2a2a2a]/50 bg-[#0f0f0f]/50 backdrop-blur-md sticky bottom-0 z-10">
+          <div className="p-4 border-t border-border bg-card/90 backdrop-blur-md sticky bottom-0 z-10">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-[#2a2a2a] cursor-pointer overflow-hidden">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center flex-shrink-0">
+              <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-secondary cursor-pointer overflow-hidden">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0">
                   <Sparkles className="h-4 w-4 text-white" />
                 </div>
                 <div className="flex-1 min-w-0 overflow-hidden">
@@ -598,7 +599,7 @@ export default function ChatInterface() {
                         ? 'truncate' 
                         : ''
                   }`}>AI Chat</p>
-                  <p className={`text-xs text-gray-400 ${
+                  <p className={`text-xs text-muted-foreground ${
                     textDisplayMode === 'wrap' 
                       ? 'break-words' 
                       : textDisplayMode === 'truncate' 
@@ -612,7 +613,7 @@ export default function ChatInterface() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowDeleteConfirm('all')}
-                  className="h-9 px-3 text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all flex items-center gap-2 flex-shrink-0"
+                  className="h-9 px-3 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-all flex items-center gap-2 flex-shrink-0"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -624,10 +625,10 @@ export default function ChatInterface() {
         {/* Resize Handle */}
         {sidebarOpen && (
           <div
-            className="absolute top-0 right-0 w-4 h-full cursor-ew-resize hover:bg-emerald-500/20 group z-30"
+            className="absolute top-0 right-0 w-4 h-full cursor-ew-resize hover:bg-primary/20 group z-30"
             onMouseDown={handleMouseDown}
           >
-            <div className="absolute top-1/2 right-1 h-20 w-1 -translate-y-1/2 bg-[#2a2a2a]/70 group-hover:bg-emerald-500 transition-colors rounded-full"></div>
+            <div className="absolute top-1/2 right-1 h-20 w-1 -translate-y-1/2 bg-secondary/70 group-hover:bg-primary transition-colors rounded-full"></div>
           </div>
         )}
       </div>
@@ -635,30 +636,31 @@ export default function ChatInterface() {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col relative overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 bg-[#0f0f0f]/90 backdrop-blur-md z-10 border-b border-[#2a2a2a]/50 sticky top-0">
+        <div className="flex items-center justify-between p-4 bg-card/90 backdrop-blur-md z-10 border-b border-border sticky top-0">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleSidebar}
-              className="text-gray-400 hover:text-white hover:bg-[#2a2a2a] h-8 w-8 p-0"
+              className="text-muted-foreground hover:text-foreground hover:bg-secondary h-8 w-8 p-0"
             >
               <Menu className="h-4 w-4" />
             </Button>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-900/20">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-900/20">
                 <Sparkles className="h-3 w-3 text-white" />
               </div>
-              <span className="font-medium text-white">AI Chat</span>
+              <span className="font-medium text-foreground">AI Chat</span>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Link href="/">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-gray-400 hover:text-emerald-400 hover:bg-[#2a2a2a] h-8 px-3 transition-all flex items-center gap-2"
+                className="text-muted-foreground hover:text-blue-400 hover:bg-secondary h-8 px-3 transition-all flex items-center gap-2"
               >
                 <Home className="h-4 w-4" />
                 <span className="hidden sm:inline">Back to Home</span>
@@ -669,7 +671,7 @@ export default function ChatInterface() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowDeleteConfirm('current')}
-                className="text-gray-400 hover:text-red-400 hover:bg-red-500/10 h-8 px-3 transition-all"
+                className="text-muted-foreground hover:text-red-400 hover:bg-red-500/10 h-8 px-3 transition-all"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Clear Chat
@@ -684,11 +686,11 @@ export default function ChatInterface() {
             <div className="max-w-3xl mx-auto px-4 py-6">
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full py-12 animate-fade-in">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center mb-6 shadow-lg shadow-emerald-900/20 animate-pulse">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-6 shadow-lg shadow-blue-900/20 animate-pulse">
                     <Sparkles className="h-8 w-8 text-white" />
                   </div>
-                  <h1 className="text-2xl font-semibold text-white mb-2">How can I help optimize your AI costs?</h1>
-                  <p className="text-gray-400 text-center mb-8 max-w-md">
+                  <h1 className="text-2xl font-semibold text-foreground mb-2">How can I help optimize your AI costs?</h1>
+                  <p className="text-muted-foreground text-center mb-8 max-w-md">
                     I'm your AI Cost Optimization Advisor. Ask me about LLM selection, ROI calculations, cost reduction strategies, and agent architecture optimization.
                   </p>
 
@@ -697,16 +699,16 @@ export default function ChatInterface() {
                       <button
                         key={index}
                         onClick={() => handleInputChange({ target: { value: suggestion.text } })}
-                        className="p-4 text-left bg-[#1a1a1a]/60 hover:bg-[#2a2a2a] border border-[#2a2a2a] rounded-xl transition-all hover:border-emerald-500/30 group hover:shadow-lg hover:shadow-emerald-900/10 backdrop-blur-sm"
+                        className="p-4 text-left bg-secondary/60 hover:bg-secondary border border-border rounded-xl transition-all hover:border-blue-500/30 group hover:shadow-lg hover:shadow-blue-900/10 backdrop-blur-sm"
                         style={{
                           animationDelay: `${index * 100}ms`,
                         }}
                       >
                         <div className="flex items-center gap-3 mb-2">
                           {suggestion.icon}
-                          <div className="h-px flex-1 bg-gradient-to-r from-emerald-500/20 to-transparent"></div>
+                          <div className="h-px flex-1 bg-gradient-to-r from-blue-500/20 to-transparent"></div>
                         </div>
-                        <p className="text-sm text-gray-300 group-hover:text-white">{suggestion.text}</p>
+                        <p className="text-sm text-muted-foreground group-hover:text-foreground">{suggestion.text}</p>
                       </button>
                     ))}
                   </div>
@@ -720,24 +722,24 @@ export default function ChatInterface() {
                     >
                       {message.role === "user" ? (
                         <div className="flex justify-end mb-2">
-                          <div className="max-w-[85%] px-4 py-2 bg-[#2a2a2a]/50 rounded-t-2xl rounded-bl-2xl text-gray-200">
+                          <div className="max-w-[85%] px-4 py-2 bg-secondary/50 rounded-t-2xl rounded-bl-2xl text-foreground">
                             <p className="whitespace-pre-wrap">{message.content}</p>
                           </div>
                         </div>
                       ) : (
                         <div className="flex items-start gap-3 group">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center flex-shrink-0 mt-1">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0 mt-1">
                             <Sparkles className="h-4 w-4 text-white" />
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center mb-1 justify-between">
-                              <span className="text-sm font-medium text-white">AI Cost Optimizer</span>
+                              <span className="text-sm font-medium text-foreground">AI Cost Optimizer</span>
                               {idx === messages.length - 1 && isTyping && (
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   onClick={handleInterrupt}
-                                  className="h-7 px-3 text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all rounded-full"
+                                  className="h-7 px-3 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-all rounded-full"
                                 >
                                   <span className="text-xs mr-1">Stop generating</span>
                                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-square">
@@ -746,7 +748,7 @@ export default function ChatInterface() {
                                 </Button>
                               )}
                             </div>
-                            <div className="markdown-content text-gray-200 leading-relaxed">
+                            <div className="markdown-content text-foreground leading-relaxed">
                               {idx === messages.length - 1 ? (
                                 <TypeWriter 
                                   text={message.content} 
@@ -765,12 +767,12 @@ export default function ChatInterface() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleCopyText(message.content, message.id)}
-                                className="h-7 px-3 text-gray-400 hover:text-white hover:bg-[#2a2a2a]/70 transition-all rounded-full"
+                                className="h-7 px-3 text-muted-foreground hover:text-foreground hover:bg-secondary/70 transition-all rounded-full"
                               >
                                 {copiedMsgId === message.id ? (
                                   <>
-                                    <Check className="h-3 w-3 mr-1 text-emerald-400" />
-                                    <span className="text-emerald-400">Copied</span>
+                                    <Check className="h-3 w-3 mr-1 text-blue-400" />
+                                    <span className="text-blue-400">Copied</span>
                                   </>
                                 ) : (
                                   <>
@@ -788,16 +790,16 @@ export default function ChatInterface() {
 
                   {isLoading && (
                     <div className="flex items-start gap-3 animate-slide-up">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center flex-shrink-0 mt-1 animate-pulse">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0 mt-1 animate-pulse">
                         <Sparkles className="h-4 w-4 text-white" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center mb-1">
-                          <span className="text-sm font-medium text-white">AI Cost Optimizer</span>
+                          <span className="text-sm font-medium text-foreground">AI Cost Optimizer</span>
                         </div>
                         <div className="flex items-center gap-3">
-                          <Loader2 className="h-4 w-4 text-emerald-400 animate-spin" />
-                          <span className="text-sm text-gray-400">Analyzing your request...</span>
+                          <Loader2 className="h-4 w-4 text-blue-400 animate-spin" />
+                          <span className="text-sm text-muted-foreground">Analyzing your request...</span>
                         </div>
                       </div>
                     </div>
@@ -811,20 +813,20 @@ export default function ChatInterface() {
         </div>
 
         {/* Input Area */}
-        <div className="bg-[#0f0f0f]/70 backdrop-blur-md p-4 z-10">
+        <div className="bg-card/70 backdrop-blur-md p-4 z-10">
           <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
             <div className="relative">
               <Input
                 value={input}
                 onChange={handleInputChange}
                 placeholder="Ask about AI costs, LLM selection, ROI calculations..."
-                className="w-full bg-[#1a1a1a]/50 border-[#2a2a2a]/50 text-white placeholder-gray-400 pr-14 py-5 text-base rounded-full focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 shadow-lg"
+                className="w-full bg-secondary/50 border-border text-foreground placeholder-muted-foreground pr-14 py-5 text-base rounded-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-lg"
                 disabled={isLoading}
               />
               <Button
                 type="submit"
                 disabled={!input.trim() || isLoading}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 w-9 p-0 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 disabled:from-gray-600 disabled:to-gray-700 rounded-full shadow-lg shadow-emerald-900/20 transition-all"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 w-9 p-0 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-700 rounded-full shadow-lg shadow-blue-900/20 transition-all"
               >
                 <Send className="h-4 w-4" />
               </Button>
@@ -839,7 +841,7 @@ export default function ChatInterface() {
           margin-bottom: 1rem;
           font-weight: 600;
           line-height: 1.25;
-          background: linear-gradient(to right, #10b981, #059669);
+          background: linear-gradient(to right, #3b82f6, #1d4ed8);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
         }
@@ -877,45 +879,48 @@ export default function ChatInterface() {
           top: 0.5rem;
           width: 0.375rem;
           height: 0.375rem;
-          background-color: #10b981;
+          background-color: #3b82f6;
           border-radius: 50%;
         }
         
         .markdown-content a {
-          color: #10b981;
+          color: #3b82f6;
           text-decoration: underline;
           transition: all 0.2s;
         }
         
         .markdown-content a:hover {
-          color: #059669;
+          color: #2563eb;
         }
         
         .markdown-content blockquote {
-          border-left: 3px solid #10b981;
+          border-left: 3px solid #3b82f6;
           padding-left: 1rem;
-          color: #d1d5db;
           margin: 1rem 0;
-          background: rgba(16, 185, 129, 0.05);
+          background: rgba(59, 130, 246, 0.05);
           border-radius: 0.25rem;
           padding: 0.5rem 1rem;
         }
         
+        .dark .markdown-content blockquote {
+          color: #d1d5db;
+        }
+        
         .markdown-content pre {
-          background-color: rgba(30, 30, 30, 0.7);
+          background-color: hsl(var(--secondary));
           padding: 1rem;
           border-radius: 0.75rem;
           overflow-x: auto;
           margin: 1rem 0;
-          border: 1px solid rgba(42, 42, 42, 0.7);
+          border: 1px solid hsl(var(--border));
         }
         
         .markdown-content code {
-          background-color: rgba(30, 30, 30, 0.7);
+          background-color: hsl(var(--secondary));
           padding: 0.2rem 0.4rem;
           border-radius: 0.25rem;
           font-size: 0.875rem;
-          border: 1px solid rgba(42, 42, 42, 0.7);
+          border: 1px solid hsl(var(--border));
         }
         
         .markdown-content pre code {
@@ -933,17 +938,16 @@ export default function ChatInterface() {
         }
         
         .markdown-content th {
-          background-color: rgba(16, 185, 129, 0.1);
-          color: #d1d5db;
+          background-color: rgba(59, 130, 246, 0.1);
           font-weight: 600;
           padding: 0.75rem;
           text-align: left;
-          border-bottom: 1px solid rgba(42, 42, 42, 0.7);
+          border-bottom: 1px solid hsl(var(--border));
         }
         
         .markdown-content td {
           padding: 0.75rem;
-          border-bottom: 1px solid rgba(42, 42, 42, 0.7);
+          border-bottom: 1px solid hsl(var(--border));
         }
         
         .markdown-content tr:last-child td {
@@ -954,14 +958,28 @@ export default function ChatInterface() {
           background-color: rgba(255, 255, 255, 0.02);
         }
         
+        .dark .markdown-content tr:nth-child(even) {
+          background-color: rgba(255, 255, 255, 0.02);
+        }
+        
+        .light .markdown-content tr:nth-child(even) {
+          background-color: rgba(0, 0, 0, 0.02);
+        }
+        
         .markdown-content strong {
-          color: #f3f4f6;
           font-weight: 600;
         }
         
+        .dark .markdown-content strong {
+          color: #f3f4f6;
+        }
+        
         .markdown-content em {
-          color: #d1d5db;
           font-style: italic;
+        }
+        
+        .dark .markdown-content em {
+          color: #d1d5db;
         }
         
         @keyframes fade-in {

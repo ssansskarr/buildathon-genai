@@ -41,22 +41,24 @@ const FeaturesGrid = ({ features }) => {
   const [ref, isIntersecting] = useIntersectionObserver()
 
   return (
-    <div ref={ref} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <div ref={ref} className="grid grid-cols-1 md:grid-cols-2 gap-8">
       {features.map((feature, index) => (
         <div
           key={index}
-          className={`bg-[#171717] border border-[#2a2a2a] rounded-xl p-6 hover:border-emerald-500/50 transition-all hover:shadow-lg hover:shadow-emerald-900/10 transform hover:scale-105 group ${
+          className={`bg-[#0f1a2e] border border-[#2a3050] rounded-xl p-6 hover:border-blue-500/50 transition-all transform hover:scale-105 ${
             isIntersecting ? "animate-slide-up-stagger" : "opacity-0 translate-y-8"
           }`}
           style={{
-            animationDelay: isIntersecting ? `${index * 150}ms` : "0ms",
-            transitionDelay: isIntersecting ? `${index * 150}ms` : "0ms",
+            animationDelay: isIntersecting ? `${index * 100}ms` : "0ms",
+            transitionDelay: isIntersecting ? `${index * 100}ms` : "0ms",
           }}
         >
-          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-400/20 to-emerald-600/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-            <div className="text-emerald-400">{feature.icon}</div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+              <div className="text-blue-400">{feature.icon}</div>
+            </div>
+            <h3 className="text-lg font-semibold">{feature.title}</h3>
           </div>
-          <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
           <p className="text-gray-400">{feature.description}</p>
         </div>
       ))}
@@ -72,7 +74,7 @@ const UseCasesGrid = ({ useCases }) => {
       {useCases.map((useCase, index) => (
         <div
           key={index}
-          className={`bg-[#171717] border border-[#2a2a2a] rounded-xl p-6 hover:border-emerald-500/50 transition-all transform hover:scale-105 ${
+          className={`bg-[#0f1a2e] border border-[#2a3050] rounded-xl p-6 hover:border-blue-500/50 transition-all transform hover:scale-105 ${
             isIntersecting ? "animate-slide-up-stagger" : "opacity-0 translate-y-8"
           }`}
           style={{
@@ -81,7 +83,7 @@ const UseCasesGrid = ({ useCases }) => {
           }}
         >
           <div className="flex items-center gap-3 mb-4">
-            <Users className="h-6 w-6 text-emerald-400" />
+            <Users className="h-6 w-6 text-blue-400" />
             <h3 className="text-xl font-semibold">{useCase.role}</h3>
           </div>
           <div className="mb-4">
@@ -89,7 +91,7 @@ const UseCasesGrid = ({ useCases }) => {
             <p className="text-gray-400 text-sm">{useCase.challenge}</p>
           </div>
           <div>
-            <h4 className="text-sm font-medium text-emerald-400 mb-2">Solution:</h4>
+            <h4 className="text-sm font-medium text-blue-400 mb-2">Solution:</h4>
             <p className="text-gray-300 text-sm">{useCase.solution}</p>
           </div>
         </div>
@@ -161,43 +163,43 @@ export default function LandingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#0a101f] text-white overflow-x-hidden">
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-2 h-2 bg-emerald-400 rounded-full animate-pulse opacity-60"></div>
-        <div className="absolute top-40 right-20 w-1 h-1 bg-emerald-300 rounded-full animate-ping opacity-40"></div>
-        <div className="absolute bottom-40 left-20 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse opacity-50"></div>
-        <div className="absolute bottom-20 right-40 w-1 h-1 bg-emerald-400 rounded-full animate-ping opacity-30"></div>
+        <div className="absolute top-20 left-10 w-2 h-2 bg-blue-400 rounded-full animate-pulse opacity-60"></div>
+        <div className="absolute top-40 right-20 w-1 h-1 bg-blue-300 rounded-full animate-ping opacity-40"></div>
+        <div className="absolute bottom-40 left-20 w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse opacity-50"></div>
+        <div className="absolute bottom-20 right-40 w-1 h-1 bg-blue-400 rounded-full animate-ping opacity-30"></div>
       </div>
 
       {/* Navbar */}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled ? "bg-[#0f0f0f]/95 backdrop-blur-sm shadow-md" : "bg-transparent"
+          isScrolled ? "bg-[#0a101f]/95 backdrop-blur-sm shadow-md" : "bg-transparent"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center animate-pulse">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center animate-pulse">
                 <DollarSign className="h-4 w-4 text-white" />
               </div>
-              <Link href="/" className="font-bold text-xl hover:text-emerald-400 transition-colors">AI Cost Optimizer</Link>
+              <Link href="/" className="font-bold text-xl hover:text-blue-400 transition-colors">AI Cost Optimizer</Link>
             </div>
             <div className="hidden md:flex items-center gap-6">
-              <a href="#features" className="text-gray-300 hover:text-emerald-400 transition-colors">
+              <a href="#features" className="text-gray-300 hover:text-blue-400 transition-colors">
                 Features
               </a>
-              <a href="#use-cases" className="text-gray-300 hover:text-emerald-400 transition-colors">
+              <a href="#use-cases" className="text-gray-300 hover:text-blue-400 transition-colors">
                 Use Cases
               </a>
-              <Link href="/chat" className="text-emerald-400 hover:text-emerald-300 transition-colors">
+              <Link href="/chat" className="text-blue-400 hover:text-blue-300 transition-colors">
                 Open Chat
               </Link>
             </div>
             <Button
               onClick={handleStartOptimization}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg px-4 py-2 transform hover:scale-105 transition-all"
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 transform hover:scale-105 transition-all"
             >
               Start Optimizing
             </Button>
@@ -208,19 +210,19 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 md:pt-40 md:pb-28">
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-emerald-900/20 to-transparent opacity-30" />
-          <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#0f0f0f] to-transparent" />
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-blue-900/20 to-transparent opacity-30" />
+          <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#0a101f] to-transparent" />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-[#1a1a1a] border border-[#2a2a2a] rounded-full px-4 py-1 mb-6 animate-fade-in">
-              <TrendingDown className="h-3 w-3 text-emerald-400" />
-              <span className="text-sm text-gray-300">Powered by Amazon Nova Models & AWS Bedrock</span>
+            <div className="inline-flex items-center gap-2 bg-[#1a2035] border border-[#2a3050] rounded-full px-4 py-1 mb-6 animate-fade-in">
+              <TrendingDown className="h-3 w-3 text-blue-400" />
+              <span className="text-sm text-gray-300">Smart insights for better business decisions</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-slide-up">
               Optimize Your{" "}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-emerald-600">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
                 AI Costs
               </span>{" "}
               with Intelligence
@@ -233,7 +235,7 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/chat">
                 <Button
-                  className="bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 text-white rounded-lg px-8 py-3 text-lg font-medium transform hover:scale-105 transition-all animate-bounce-subtle"
+                  className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white rounded-lg px-8 py-3 text-lg font-medium transform hover:scale-105 transition-all animate-bounce-subtle"
                 >
                   Start Cost Analysis
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -242,76 +244,94 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Dashboard Preview */}
-          <div className="mt-16 relative max-w-5xl mx-auto">
-            <div className="aspect-[16/9] rounded-xl overflow-hidden border border-[#2a2a2a] shadow-2xl shadow-emerald-900/20 transform hover:scale-105 transition-all duration-500">
-              <div className="w-full h-full bg-[#171717] relative">
-                {/* AI Cost Dashboard Preview */}
-                <div className="absolute inset-0 flex">
-                  {/* Sidebar */}
-                  <div className="w-64 bg-[#171717] border-r border-[#2a2a2a] hidden md:block">
-                    <div className="p-4 border-b border-[#2a2a2a]">
-                      <div className="bg-gradient-to-r from-emerald-500 to-emerald-700 rounded-lg h-10 w-full flex items-center justify-center">
-                        <span className="text-white text-sm font-medium">New Analysis</span>
-                      </div>
+          <div className="mt-16 relative">
+            <div className="absolute -top-8 -bottom-8 -left-8 -right-8 bg-gradient-to-br from-blue-900/10 to-blue-600/5 rounded-3xl blur-xl"></div>
+            <div className="relative bg-[#0f1a2e] border border-[#2a3050] rounded-xl p-6 md:p-8 shadow-xl">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/5 rounded-full blur-2xl"></div>
+              <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-500/10 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                      </svg>
                     </div>
-                    <div className="p-3">
-                      {["Cost Analysis", "LLM Comparison", "ROI Calculator"].map((item, i) => (
-                        <div key={i} className="mb-2 p-2 bg-[#1a1a1a] rounded-lg h-12 flex items-center">
-                          <div className="w-3 h-3 bg-emerald-400 rounded-full mr-2"></div>
-                          <span className="text-xs text-gray-300">{item}</span>
-                        </div>
-                      ))}
+                    <div>
+                      <h3 className="text-lg font-semibold">AI Cost Advisor</h3>
+                      <p className="text-sm text-gray-400">Intelligent chatbot assistance</p>
                     </div>
                   </div>
-                  {/* Main Dashboard */}
-                  <div className="flex-1 flex flex-col">
-                    <div className="h-12 border-b border-[#2a2a2a] flex items-center px-4">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 mr-2"></div>
-                      <div className="h-4 w-40 bg-[#2a2a2a] rounded"></div>
+                  <div className="bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full text-xs font-medium">
+                    Live Chat
+                  </div>
+                </div>
+                
+                <div className="bg-[#0a101f] rounded-lg p-4 mb-4 border border-[#2a3050]">
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex-shrink-0 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                      </svg>
                     </div>
-                    <div className="flex-1 p-4 overflow-hidden">
-                      {/* Cost Charts */}
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="bg-[#1a1a1a] rounded-lg p-3">
-                          <div className="h-3 w-20 bg-[#2a2a2a] rounded mb-2"></div>
-                          <div className="h-16 bg-gradient-to-t from-emerald-500/20 to-emerald-500/5 rounded"></div>
-                        </div>
-                        <div className="bg-[#1a1a1a] rounded-lg p-3">
-                          <div className="h-3 w-24 bg-[#2a2a2a] rounded mb-2"></div>
-                          <div className="h-16 bg-gradient-to-t from-emerald-400/20 to-emerald-400/5 rounded"></div>
-                        </div>
+                    <div className="bg-[#1a2035] rounded-lg p-3 text-sm">
+                      <p>How can I optimize my AI costs for my customer service chatbot?</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-500/20 flex-shrink-0 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="bg-[#1a2035]/70 rounded-lg p-3 text-sm mb-2">
+                        <p>Based on my analysis, you can reduce costs by:</p>
+                        <ul className="list-disc pl-4 mt-2 space-y-1">
+                          <li>Using a smaller model for initial queries</li>
+                          <li>Implementing caching for common questions</li>
+                          <li>Optimizing prompt length to reduce token usage</li>
+                        </ul>
                       </div>
-                      {/* Recommendations */}
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 p-2 bg-[#1a1a1a] rounded">
-                          <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                          <div className="h-2 bg-[#2a2a2a] rounded flex-1"></div>
-                        </div>
-                        <div className="flex items-center gap-2 p-2 bg-[#1a1a1a] rounded">
-                          <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                          <div className="h-2 bg-[#2a2a2a] rounded flex-1"></div>
-                        </div>
+                      <div className="bg-[#1a2035]/70 rounded-lg p-3 text-sm">
+                        <p>These changes could reduce your monthly costs from <span className="text-red-400">$12,450</span> to <span className="text-blue-400">$5,280</span>, saving 57%.</p>
                       </div>
                     </div>
                   </div>
                 </div>
+                
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    placeholder="Ask about optimizing your AI costs..." 
+                    className="w-full bg-[#1a2035]/50 border border-[#2a3050] rounded-full py-3 px-4 pr-12 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <button className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                      <path d="m22 2-7 20-4-9-9-4Z"></path>
+                      <path d="M22 2 11 13"></path>
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-emerald-700 text-white px-6 py-2 rounded-full text-sm font-medium shadow-lg animate-pulse">
-              Real-time Cost Analysis
+            <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-500 to-blue-700 text-white px-6 py-2 rounded-full text-sm font-medium shadow-lg animate-pulse">
+              AI-Powered Chat Assistant
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-[#0a0a0a]">
+      <section id="features" className="py-20 bg-[#050a15]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Intelligent{" "}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-emerald-600">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
                 Cost Optimization
               </span>{" "}
               Features
@@ -332,7 +352,7 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Built for{" "}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-emerald-600">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
                 Enterprise Teams
               </span>
             </h2>
@@ -349,14 +369,14 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="py-20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-r from-emerald-900/30 to-emerald-700/30 rounded-2xl p-8 md:p-12 border border-emerald-500/20 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 animate-pulse"></div>
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 animate-pulse"></div>
+          <div className="bg-gradient-to-r from-blue-900/30 to-blue-700/30 rounded-2xl p-8 md:p-12 border border-blue-500/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 animate-pulse"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 animate-pulse"></div>
 
             <div className="relative z-10 text-center">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 Ready to{" "}
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-emerald-600">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
                   Optimize Your AI Costs?
                 </span>
               </h2>
@@ -366,7 +386,7 @@ export default function LandingPage() {
               </p>
               <Link href="/chat">
                 <Button
-                  className="bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 text-white rounded-lg px-8 py-3 text-lg font-medium transform hover:scale-105 transition-all animate-pulse"
+                  className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white rounded-lg px-8 py-3 text-lg font-medium transform hover:scale-105 transition-all animate-pulse"
                 >
                   Start Free Analysis
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -378,24 +398,36 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 bg-[#0a0a0a] border-t border-[#2a2a2a]">
+      <footer className="py-12 border-t border-[#2a3050] bg-[#0a101f]/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
                 <DollarSign className="h-4 w-4 text-white" />
               </div>
               <span className="font-bold text-xl">AI Cost Optimizer</span>
             </div>
-            <div className="flex items-center gap-6">
-              <Link href="/" className="text-gray-400 hover:text-emerald-400 transition-colors">Home</Link>
-              <Link href="/chat" className="text-gray-400 hover:text-emerald-400 transition-colors">Chat</Link>
-              <a href="#features" className="text-gray-400 hover:text-emerald-400 transition-colors">Features</a>
-              <a href="#use-cases" className="text-gray-400 hover:text-emerald-400 transition-colors">Use Cases</a>
+            <div className="flex flex-wrap gap-6 justify-center">
+              <Link href="/chat" className="text-gray-300 hover:text-blue-400 transition-colors">
+                Open Chat
+              </Link>
+              <a href="#features" className="text-gray-300 hover:text-blue-400 transition-colors">
+                Features
+              </a>
+              <a href="#use-cases" className="text-gray-300 hover:text-blue-400 transition-colors">
+                Use Cases
+              </a>
+              <a href="#" className="text-gray-300 hover:text-blue-400 transition-colors">
+                Terms
+              </a>
+              <a href="#" className="text-gray-300 hover:text-blue-400 transition-colors">
+                Privacy
+              </a>
             </div>
-            <div className="mt-4 md:mt-0 text-gray-500 text-sm">
-              © 2024 AI Cost Optimizer. All rights reserved.
-            </div>
+          </div>
+          <div className="mt-8 text-center text-gray-400 text-sm">
+            <p>© {new Date().getFullYear()} AI Cost Optimizer. All rights reserved.</p>
+            <p className="mt-1">Powered by advanced AI models to help you optimize costs.</p>
           </div>
         </div>
       </footer>
