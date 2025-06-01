@@ -1,4 +1,4 @@
-# AI Cost Optimizer
+# AIlign
 
 An enterprise AI cost optimization advisor that helps companies optimize their AI costs, select the right LLMs, calculate ROI, and architect efficient AI agents.
 

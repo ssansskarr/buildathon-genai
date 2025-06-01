@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Cost Optimizer",
-  description: "Optimize your AI costs with intelligence",
+  title: "AIlign - AI Investment Alignment",
+  description: "Align your AI investments with business outcomes and optimize ROI",
 };
 
 export default function RootLayout({

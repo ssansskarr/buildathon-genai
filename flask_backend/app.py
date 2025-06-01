@@ -66,7 +66,7 @@ def chat():
 
 @app.route('/health', methods=['GET'])
 def health_check():
-    return jsonify({"status": "healthy", "service": "AI Cost Optimizer Flask Backend"})
+    return jsonify({"status": "healthy", "service": "AIlign Flask Backend"})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

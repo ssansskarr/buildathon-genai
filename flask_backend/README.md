@@ -1,6 +1,6 @@
-# AI Cost Optimizer - Flask Backend
+# AIlign - Flask Backend
 
-This is the Flask backend for the AI Cost Optimizer application. It serves as an API that connects to Google's Gemini model to provide AI cost optimization advice.
+This is the Flask backend for the AIlign application. It serves as an API that connects to Google's Gemini model to provide AI investment alignment advice.
 
 ## Setup
 
@@ -52,7 +52,7 @@ Health check endpoint.
 ```json
 {
   "status": "healthy",
-  "service": "AI Cost Optimizer Flask Backend"
+  "service": "AIlign Flask Backend"
 }
 ```
 

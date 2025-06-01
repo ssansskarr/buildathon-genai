@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { TrendingDown, ArrowRight, DollarSign, Target, Users, Brain, Calculator } from 'lucide-react'
+import { TrendingDown, ArrowRight, DollarSign, Target, Users, Brain, Calculator, BarChart, Building, FileText } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 
 // Custom hook for intersection observer
@@ -118,24 +118,24 @@ export default function LandingPage() {
 
   const features = [
     {
-      icon: <TrendingDown className="h-5 w-5" />,
-      title: "Cost Reduction Analysis",
-      description: "Identify which tasks AI can automate to reduce operational costs and free up human resources.",
+      icon: <BarChart className="h-5 w-5" />,
+      title: "Cost Analysis & Reduction",
+      description: "Identify tasks where AI can automate workflows to free up human resources and reduce operational costs.",
     },
     {
       icon: <Brain className="h-5 w-5" />,
       title: "LLM Selection Advisor",
-      description: "Get recommendations on the optimal LLM for your use case, balancing cost, latency, and quality.",
+      description: "Get tailored recommendations on the optimal LLM for your specific use case, balancing cost, latency, and quality.",
     },
     {
       icon: <Calculator className="h-5 w-5" />,
       title: "ROI Calculator",
-      description: "Calculate implementation costs, inference costs, and projected ROI for AI agent deployments.",
+      description: "Calculate AI implementation costs, ongoing inference expenses, and projected ROI for strategic planning.",
     },
     {
       icon: <Target className="h-5 w-5" />,
-      title: "Agent Architecture",
-      description: "Optimize your AI agent architecture to minimize credit consumption and maximize efficiency.",
+      title: "Architecture Optimization",
+      description: "Identify which agent actions consume credits and optimize your AI architecture to minimize costs.",
     },
   ]
 
@@ -143,22 +143,22 @@ export default function LandingPage() {
     {
       role: "AI Developers",
       challenge: "Selecting cost-effective LLMs and optimizing agent performance",
-      solution: "Get technical recommendations on model selection and architecture optimization",
+      solution: "Access technical recommendations on architecture design and credit optimization strategies",
     },
     {
       role: "Product Managers",
-      challenge: "Understanding AI implementation costs and business value",
-      solution: "Receive clear ROI calculations and cost-benefit analysis for AI initiatives",
+      challenge: "Understanding AI implementation costs and business impact",
+      solution: "Get clear ROI calculations and cost-benefit analysis for AI initiatives across functions",
     },
     {
       role: "Tech Leads",
       challenge: "Designing scalable AI systems within budget constraints",
-      solution: "Access architectural guidance and cost optimization strategies",
+      solution: "Receive guidance on cost-efficient architecture and optimal LLM selection",
     },
     {
       role: "Decision Makers",
-      challenge: "Evaluating AI investments and understanding total cost of ownership",
-      solution: "Get comprehensive financial analysis and strategic recommendations",
+      challenge: "Evaluating AI investments and total cost of ownership",
+      solution: "Access comprehensive financial analysis for deploying AI across the organization",
     },
   ]
 
@@ -182,9 +182,9 @@ export default function LandingPage() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center animate-pulse">
-                <DollarSign className="h-4 w-4 text-white" />
+                <Target className="h-4 w-4 text-white" />
               </div>
-              <Link href="/" className="font-bold text-xl hover:text-blue-400 transition-colors">AI Cost Optimizer</Link>
+              <Link href="/" className="font-bold text-xl hover:text-blue-400 transition-colors">AIlign</Link>
             </div>
             <div className="hidden md:flex items-center gap-6">
               <a href="#features" className="text-gray-300 hover:text-blue-400 transition-colors">
@@ -194,14 +194,14 @@ export default function LandingPage() {
                 Use Cases
               </a>
               <Link href="/chat" className="text-blue-400 hover:text-blue-300 transition-colors">
-                Open Chat
+                Open Advisor
               </Link>
             </div>
             <Button
               onClick={handleStartOptimization}
               className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 transform hover:scale-105 transition-all"
             >
-              Start Optimizing
+              Start AIligning
             </Button>
           </div>
         </div>
@@ -217,19 +217,18 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-[#1a2035] border border-[#2a3050] rounded-full px-4 py-1 mb-6 animate-fade-in">
-              <TrendingDown className="h-3 w-3 text-blue-400" />
-              <span className="text-sm text-gray-300">Smart insights for better business decisions</span>
+              <Target className="h-3 w-3 text-blue-400" />
+              <span className="text-sm text-gray-300">Align AI investments with business outcomes</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-slide-up">
               Optimize Your{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
-                AI Costs
+                AI Investment
               </span>{" "}
-              with Intelligence
+              with AIlign
             </h1>
             <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto animate-slide-up-delay">
-              Enterprise AI Cost Optimization Advisor that helps you reduce operational costs, select optimal LLMs,
-              calculate ROI, and architect efficient AI agents. Make data-driven decisions for your AI investments.
+              The intelligent advisor that helps business teams select the right LLMs, calculate implementation ROI, optimize agent architecture, and align AI costs with business value.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -237,7 +236,7 @@ export default function LandingPage() {
                 <Button
                   className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white rounded-lg px-8 py-3 text-lg font-medium transform hover:scale-105 transition-all animate-bounce-subtle"
                 >
-                  Start Cost Analysis
+                  Start Your Analysis
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -258,12 +257,12 @@ export default function LandingPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">AI Cost Advisor</h3>
-                      <p className="text-sm text-gray-400">Intelligent chatbot assistance</p>
+                      <h3 className="text-lg font-semibold">AIlign Advisor</h3>
+                      <p className="text-sm text-gray-400">Intelligent AI investment guidance</p>
                     </div>
                   </div>
                   <div className="bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full text-xs font-medium">
-                    Live Chat
+                    Live Analysis
                   </div>
                 </div>
                 
@@ -275,7 +274,7 @@ export default function LandingPage() {
                       </svg>
                     </div>
                     <div className="bg-[#1a2035] rounded-lg p-3 text-sm">
-                      <p>How can I optimize my AI costs for my customer service chatbot?</p>
+                      <p>Which LLM should we use for our customer service AI that balances cost and quality?</p>
                     </div>
                   </div>
                   
@@ -289,15 +288,15 @@ export default function LandingPage() {
                     </div>
                     <div>
                       <div className="bg-[#1a2035]/70 rounded-lg p-3 text-sm mb-2">
-                        <p>Based on my analysis, you can reduce costs by:</p>
+                        <p>Based on your customer service needs, I recommend:</p>
                         <ul className="list-disc pl-4 mt-2 space-y-1">
-                          <li>Using a smaller model for initial queries</li>
-                          <li>Implementing caching for common questions</li>
-                          <li>Optimizing prompt length to reduce token usage</li>
+                          <li>Using Claude Instant for initial query classification</li>
+                          <li>GPT-3.5 Turbo for routine customer inquiries</li>
+                          <li>Reserving GPT-4 for complex escalations only</li>
                         </ul>
                       </div>
                       <div className="bg-[#1a2035]/70 rounded-lg p-3 text-sm">
-                        <p>These changes could reduce your monthly costs from <span className="text-red-400">$12,450</span> to <span className="text-blue-400">$5,280</span>, saving 57%.</p>
+                        <p>This tiered approach reduces your monthly costs by <span className="text-red-400">58%</span> while maintaining <span className="text-blue-400">94%</span> customer satisfaction.</p>
                       </div>
                     </div>
                   </div>
@@ -306,7 +305,7 @@ export default function LandingPage() {
                 <div className="relative">
                   <input 
                     type="text" 
-                    placeholder="Ask about optimizing your AI costs..." 
+                    placeholder="Ask about AI selection, ROI, architecture, or cost optimization..." 
                     className="w-full bg-[#1a2035]/50 border border-[#2a3050] rounded-full py-3 px-4 pr-12 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   />
                   <button className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
@@ -319,7 +318,7 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-500 to-blue-700 text-white px-6 py-2 rounded-full text-sm font-medium shadow-lg animate-pulse">
-              AI-Powered Chat Assistant
+              AI Investment Analysis
             </div>
           </div>
         </div>
@@ -330,15 +329,14 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Intelligent{" "}
+              AI{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
-                Cost Optimization
+                Investment Alignment
               </span>{" "}
               Features
             </h2>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              Comprehensive AI cost analysis tools designed for enterprise teams to make informed decisions about AI
-              investments and implementations.
+              Comprehensive AI investment analysis tools designed to help business teams make informed decisions and optimize returns.
             </p>
           </div>
 
@@ -351,14 +349,13 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Built for{" "}
+              Solutions for{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
-                Enterprise Teams
+                Every Stakeholder
               </span>
             </h2>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              Tailored solutions for different roles in your organization, from technical teams to executive decision
-              makers.
+              Tailored insights for each role in your organization's AI implementation journey.
             </p>
           </div>
 
@@ -377,12 +374,11 @@ export default function LandingPage() {
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 Ready to{" "}
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
-                  Optimize Your AI Costs?
+                  AIlign Your Business?
                 </span>
               </h2>
               <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-                Start your AI cost optimization journey today. Get personalized recommendations, ROI calculations, and
-                architectural guidance from our intelligent advisor.
+                Start your AI investment alignment journey today. Get personalized LLM recommendations, ROI calculations, and architectural guidance for cost-efficient AI deployment.
               </p>
               <Link href="/chat">
                 <Button
@@ -396,41 +392,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="py-12 border-t border-[#2a3050] bg-[#0a101f]/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                <DollarSign className="h-4 w-4 text-white" />
-              </div>
-              <span className="font-bold text-xl">AI Cost Optimizer</span>
-            </div>
-            <div className="flex flex-wrap gap-6 justify-center">
-              <Link href="/chat" className="text-gray-300 hover:text-blue-400 transition-colors">
-                Open Chat
-              </Link>
-              <a href="#features" className="text-gray-300 hover:text-blue-400 transition-colors">
-                Features
-              </a>
-              <a href="#use-cases" className="text-gray-300 hover:text-blue-400 transition-colors">
-                Use Cases
-              </a>
-              <a href="#" className="text-gray-300 hover:text-blue-400 transition-colors">
-                Terms
-              </a>
-              <a href="#" className="text-gray-300 hover:text-blue-400 transition-colors">
-                Privacy
-              </a>
-            </div>
-          </div>
-          <div className="mt-8 text-center text-gray-400 text-sm">
-            <p>© {new Date().getFullYear()} AI Cost Optimizer. All rights reserved.</p>
-            <p className="mt-1">Powered by advanced AI models to help you optimize costs.</p>
-          </div>
-        </div>
-      </footer>
 
       <style jsx>{`
         @keyframes fade-in {

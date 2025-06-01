@@ -323,19 +323,19 @@ export default function ChatInterface() {
 
   const suggestions = [
     {
-      text: "Help me calculate the ROI for implementing AI agents in customer service",
+      text: "How can I align our AI implementation with our business objectives?",
       icon: <Zap className="h-5 w-5 text-blue-400" />
     },
     {
-      text: "Compare the costs of different LLMs for our use case",
+      text: "Which LLM provides the best balance of cost and quality for our customer service chatbot?",
       icon: <Settings className="h-5 w-5 text-blue-400" />
     },
     {
-      text: "What are the best practices for reducing AI operational costs?",
+      text: "Help me calculate the ROI for implementing AI in our business processes",
       icon: <Sparkles className="h-5 w-5 text-blue-400" />
     },
     {
-      text: "How can I optimize my AI agent architecture to minimize costs?",
+      text: "What functions across our organization can benefit most from AI automation?",
       icon: <Zap className="h-5 w-5 text-blue-400" />
     },
   ]
@@ -598,14 +598,14 @@ export default function ChatInterface() {
                       : textDisplayMode === 'truncate' 
                         ? 'truncate' 
                         : ''
-                  }`}>AI Chat</p>
+                  }`}>AIlign</p>
                   <p className={`text-xs text-muted-foreground ${
                     textDisplayMode === 'wrap' 
                       ? 'break-words' 
                       : textDisplayMode === 'truncate' 
                         ? 'truncate' 
                         : ''
-                  }`}>Powered by Gemini</p>
+                  }`}>AI Investment Advisor</p>
                 </div>
               </div>
               {chatHistory.length > 0 && (
@@ -650,7 +650,7 @@ export default function ChatInterface() {
               <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-900/20">
                 <Sparkles className="h-3 w-3 text-white" />
               </div>
-              <span className="font-medium text-foreground">AI Chat</span>
+              <span className="font-medium text-foreground">AIlign Advisor</span>
             </div>
           </div>
           
@@ -689,9 +689,9 @@ export default function ChatInterface() {
                   <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-6 shadow-lg shadow-blue-900/20 animate-pulse">
                     <Sparkles className="h-8 w-8 text-white" />
                   </div>
-                  <h1 className="text-2xl font-semibold text-foreground mb-2">How can I help optimize your AI costs?</h1>
+                  <h1 className="text-2xl font-semibold text-foreground mb-2">How can I help align your AI investments?</h1>
                   <p className="text-muted-foreground text-center mb-8 max-w-md">
-                    I'm your AI Cost Optimization Advisor. Ask me about LLM selection, ROI calculations, cost reduction strategies, and agent architecture optimization.
+                    I'm your AIlign Advisor. I can help identify which tasks to automate, recommend optimal LLMs, calculate ROI, analyze costs, and provide AI architecture guidance for your business needs.
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
@@ -733,7 +733,7 @@ export default function ChatInterface() {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center mb-1 justify-between">
-                              <span className="text-sm font-medium text-foreground">AI Cost Optimizer</span>
+                              <span className="text-sm font-medium text-foreground">AIlign</span>
                               {idx === messages.length - 1 && isTyping && (
                                 <Button
                                   variant="ghost"
@@ -795,7 +795,7 @@ export default function ChatInterface() {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center mb-1">
-                          <span className="text-sm font-medium text-foreground">AI Cost Optimizer</span>
+                          <span className="text-sm font-medium text-foreground">AIlign</span>
                         </div>
                         <div className="flex items-center gap-3">
                           <Loader2 className="h-4 w-4 text-blue-400 animate-spin" />
@@ -819,7 +819,7 @@ export default function ChatInterface() {
               <Input
                 value={input}
                 onChange={handleInputChange}
-                placeholder="Ask about AI costs, LLM selection, ROI calculations..."
+                placeholder="Ask about AI investment alignment, LLM selection, ROI, business impact..."
                 className="w-full bg-secondary/50 border-border text-foreground placeholder-muted-foreground pr-14 py-5 text-base rounded-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-lg"
                 disabled={isLoading}
               />
