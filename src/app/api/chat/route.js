@@ -21,12 +21,12 @@ export async function POST(req) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(isDirectApi && { "x-api-key": "sk-default-gpfGHgnesfpPAetk2jmts64V5QTB3rc7" })
+        ...(isDirectApi && { "x-api-key": "sk-default-jr9mnUxXOtQcDnWvmVokUtgvmcC5YqHv" })
       },
       body: JSON.stringify(isDirectApi ? {
-        "user_id": "sanskarg115@gmail.com",
-        "agent_id": "683bfd593b7c57f1745ceb5c",
-        "session_id": "683bfd593b7c57f1745ceb5c-rxrc71bfyd",
+        "user_id": "sanskar.gupta.22cse@bmu.edu.in",
+        "agent_id": "683cd9a4e5bd32ccbe646960",
+        "session_id": "683cd9a4e5bd32ccbe646960-sj5l6qjdxo",
         "message": latestUserMessage.content
       } : {
         messages
@@ -44,7 +44,7 @@ export async function POST(req) {
     
     // Return the AI response
     return new Response(JSON.stringify({ 
-      text: isDirectApi ? data.response : data.response 
+      response: isDirectApi ? data.response : data.response 
     }), {
       headers: { "Content-Type": "application/json" }
     })

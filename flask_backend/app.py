@@ -2,15 +2,18 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 import os
-import json
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Define environment variables directly in code as a fallback
 ENV_VARS = {
-    "LYZR_API_KEY": "sk-default-gpfGHgnesfpPAetk2jmts64V5QTB3rc7",
-    "LYZR_AGENT_ID": "683bfd593b7c57f1745ceb5c",
-    "LYZR_USER_ID": "sanskarg115@gmail.com",
-    "LYZR_SESSION_ID": "683bfd593b7c57f1745ceb5c-rxrc71bfyd",
-    "GEMINI_API_KEY": "AIzaSyDlxUEyM3sxQQDgXKjJ8glKe1wr-MaSWWQ"
+    "LYZR_API_KEY": "sk-default-jr9mnUxXOtQcDnWvmVokUtgvmcC5YqHv",
+    "LYZR_AGENT_ID": "683cd9a4e5bd32ccbe646960",
+    "LYZR_USER_ID": "sanskar.gupta.22cse@bmu.edu.in",
+    "LYZR_SESSION_ID": "683cd9a4e5bd32ccbe646960-sj5l6qjdxo",
+    "GEMINI_API_KEY": "AIzaSyARVFZ6ub0Q6vfJATOLg1ew4TrNlJiL9vE"
 }
 
 # Helper function to get environment variables with fallback
@@ -30,11 +33,11 @@ LYZR_SESSION_ID = get_env("LYZR_SESSION_ID")
 
 # Google Gemini API configuration
 GEMINI_API_KEY = get_env("GEMINI_API_KEY")
-GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent"
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
 # System prompt for Gemini to enhance Lyzr responses
 GEMINI_SYSTEM_PROMPT = """
-You are OptimusAI, an expert AI Cost Optimization Advisor Agent specializing in Generative AI adoption for enterprises.
+You are AIlign, an expert AI Investment Alignment Advisor specializing in helping businesses align their AI investments with strategic goals and optimize ROI.
 Your task is to enhance and format the following AI-generated response.
 
 Guidelines:
@@ -47,9 +50,55 @@ Guidelines:
 7. Include clear action items when appropriate
 8. Format monetary values and percentages consistently
 9. Ensure all technical recommendations are accurate and industry-standard
+10. IMPORTANT: Do NOT include any meta-commentary about enhancing, formatting, or improving the response
+11. IMPORTANT: Write as if you are directly answering the user's query, not commenting on another AI's response
+12. NEVER start with phrases like "Here's an enhanced version" or "I've formatted this response"
+13. NEVER refer to the original response or mention that you're modifying anything
 
-Your output should be comprehensive yet scannable, making complex AI cost information accessible to business leaders.
+Your output should help businesses make informed decisions about:
+- Which tasks AI can automate to free up human resources
+- Which functions across organizations can leverage AI to save costs
+- How to optimize AI agent costs and reduce credit consumption
+- Which LLM is optimal for specific use cases based on cost, latency and quality
+- Calculating ROI and estimating implementation costs for AI initiatives
 """
+
+def cleanup_meta_commentary(text):
+    """
+    Remove meta-commentary about the enhancement process from the response
+    """
+    # List of common meta-commentary phrases to remove
+    meta_phrases = [
+        "Here's an enhanced version:",
+        "Here's the enhanced response:",
+        "I've enhanced and formatted the response:",
+        "Here's an enhanced and formatted version of the AI response",
+        "I've improved the formatting of the response:",
+        "I've formatted the response for better readability:",
+        "Based on the original response, here's a more structured version:",
+        "Here's a clearer, more structured version of the information:",
+        "I've organized the information more clearly:",
+        "Here's a more readable version:",
+        "Based on the AI's response, here's a clearer explanation:",
+        "I've refined the original response:",
+        "Here's a more concise version:",
+        "Here's a more detailed response:",
+    ]
+    
+    result = text
+    for phrase in meta_phrases:
+        if result.startswith(phrase):
+            result = result.replace(phrase, "", 1).strip()
+    
+    # Remove any generic opening lines that might be meta-commentary
+    lines = result.split('\n')
+    if lines and any(line.lower().startswith(("here's", "based on", "i've", "following the")) for line in lines[:2]):
+        # Check if the first line appears to be meta-commentary
+        first_line = lines[0].lower()
+        if any(term in first_line for term in ["enhance", "format", "improve", "original", "response", "structure", "organize"]):
+            result = '\n'.join(lines[1:]).strip()
+    
+    return result
 
 def enhance_with_gemini(original_response, query):
     """
@@ -58,8 +107,7 @@ def enhance_with_gemini(original_response, query):
     try:
         # Prepare the request to Gemini
         headers = {
-            "Content-Type": "application/json",
-            "x-goog-api-key": GEMINI_API_KEY
+            "Content-Type": "application/json"
         }
         
         data = {
@@ -67,11 +115,12 @@ def enhance_with_gemini(original_response, query):
                 {
                     "role": "user",
                     "parts": [
-                        {"text": f"USER QUERY: {query}\n\nORIGINAL RESPONSE: {original_response}\n\nPlease enhance and format this response according to the guidelines."}
+                        {"text": f"USER QUERY: {query}\n\nPlease respond to this query using the following information: {original_response}"}
                     ]
                 }
             ],
             "systemInstruction": {
+                "role": "system",
                 "parts": [
                     {"text": GEMINI_SYSTEM_PROMPT}
                 ]
@@ -97,6 +146,8 @@ def enhance_with_gemini(original_response, query):
             # Extract the enhanced text from Gemini's response
             enhanced_text = result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
             if enhanced_text:
+                # Clean up any possible remaining meta-commentary
+                enhanced_text = cleanup_meta_commentary(enhanced_text)
                 return enhanced_text
             else:
                 print("Empty response from Gemini")
@@ -153,6 +204,9 @@ def chat():
                 else:
                     # Enhance the response using Google Gemini
                     ai_text = enhance_with_gemini(ai_text, user_message)
+                    
+                    # Final cleanup to ensure no meta-commentary remains
+                    ai_text = cleanup_meta_commentary(ai_text)
             except (KeyError, IndexError):
                 ai_text = "Error parsing the AI response. Please try again."
                 

@@ -1,6 +1,6 @@
 # AIlign - Flask Backend
 
-This is the Flask backend for the AIlign application. It serves as an API that connects to Google's Gemini model to provide AI investment alignment advice.
+This is the Flask backend for the AIlign application. It serves as an API that connects to Lyzr's Agent Studio API and Google's Gemini model to provide AI investment alignment advice.
 
 ## Setup
 
@@ -10,7 +10,20 @@ This is the Flask backend for the AIlign application. It serves as an API that c
 pip install -r requirements.txt
 ```
 
-2. Run the Flask server:
+2. Create a `.env` file in the flask_backend directory with the following environment variables:
+
+```
+# Lyzr API credentials
+LYZR_API_KEY=your_lyzr_api_key
+LYZR_AGENT_ID=your_lyzr_agent_id
+LYZR_USER_ID=your_lyzr_user_id
+LYZR_SESSION_ID=your_lyzr_session_id
+
+# Google Gemini API key
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+3. Run the Flask server:
 
 ```bash
 python app.py
@@ -22,7 +35,7 @@ The server will start on http://localhost:5000.
 
 ### POST /api/chat
 
-Processes chat messages and returns AI responses.
+Processes chat messages and returns AI responses. The backend forwards user queries to Lyzr's Agent API and enhances the responses using Google's Gemini API.
 
 **Request Body:**
 
@@ -56,9 +69,15 @@ Health check endpoint.
 }
 ```
 
-## Configuration
+## Environment Variables
 
-The API key for Google Gemini is currently hardcoded in the app.py file. In a production environment, you should use environment variables or a secure configuration system.
+- `LYZR_API_KEY`: API key for accessing Lyzr's Agent Studio
+- `LYZR_AGENT_ID`: ID of the Lyzr agent to use
+- `LYZR_USER_ID`: User ID for Lyzr's Agent Studio
+- `LYZR_SESSION_ID`: Session ID for Lyzr's Agent Studio
+- `GEMINI_API_KEY`: API key for Google's Gemini AI model
+
+If environment variables are not set, the backend will use default values defined in the code.
 
 ## Integration with Frontend
 

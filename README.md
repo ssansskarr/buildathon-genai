@@ -1,13 +1,14 @@
 # AIlign
 
-An enterprise AI cost optimization advisor that helps companies optimize their AI costs, select the right LLMs, calculate ROI, and architect efficient AI agents.
+An enterprise AI investment alignment advisor that helps companies optimize their AI investments, select the right LLMs, calculate ROI, and architect efficient AI agents.
 
 ## Project Structure
 
 ```
-ai-cost-optimizer/
+ailign/
 ├── src/                   # Next.js frontend
 │   ├── app/               # Next.js app directory
+│   │   ├── api/           # API routes for production
 │   ├── components/        # React components
 │   └── lib/               # Utility functions
 ├── flask_backend/         # Flask backend
@@ -18,6 +19,26 @@ ai-cost-optimizer/
 ```
 
 ## Setup
+
+### Environment Variables
+
+1. Create a `.env` file in the project root:
+```
+# Backend URL - Use local Flask backend in development
+NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
+```
+
+2. Create a `.env` file in the `flask_backend` directory:
+```
+# Lyzr API credentials
+LYZR_API_KEY=sk-default-jr9mnUxXOtQcDnWvmVokUtgvmcC5YqHv
+LYZR_AGENT_ID=683cd9a4e5bd32ccbe646960
+LYZR_USER_ID=sanskar.gupta.22cse@bmu.edu.in
+LYZR_SESSION_ID=683cd9a4e5bd32ccbe646960-sj5l6qjdxo
+
+# Google Gemini API key
+GEMINI_API_KEY=AIzaSyARVFZ6ub0Q6vfJATOLg1ew4TrNlJiL9vE
+```
 
 ### Frontend (Next.js)
 
@@ -45,9 +66,7 @@ cd flask_backend
 pip install -r requirements.txt
 ```
 
-3. Create a `.env` file based on `.env.example` and add your Lyzr API key.
-
-4. Run the Flask server:
+3. Run the Flask server:
 ```bash
 python app.py
 ```
@@ -63,8 +82,8 @@ start-app.bat
 
 ## Features
 
-- Interactive chat interface with AI cost optimization advisor
-- Real-time responses from Lyzr Agent Studio using OpenAI o3 model
+- Interactive chat interface with AI investment alignment advisor
+- Provides recommendations powered by Lyzr AI and enhanced by Google's Gemini model
 - Cost reduction analysis for AI implementations
 - LLM selection recommendations
 - ROI calculations for AI projects
@@ -74,4 +93,4 @@ start-app.bat
 
 - **Frontend**: Next.js, React, Tailwind CSS
 - **Backend**: Flask, Python
-- **AI**: Lyzr Agent Studio API with OpenAI o3 model
+- **AI**: Lyzr Agent Studio API, Google Gemini API

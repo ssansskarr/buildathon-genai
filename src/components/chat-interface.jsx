@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Send, Plus, Menu, Sparkles, User, Copy, Trash2, Check, Home, Zap, Settings, Loader2 } from 'lucide-react'
+import { Send, Plus, Menu, Sparkles, User, Copy, Trash2, Check, Home, Zap, Settings, Loader2, Download, FileDown } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -11,6 +11,9 @@ import remarkGfm from 'remark-gfm'
 import Link from "next/link"
 import TypeWriter from "@/components/type-writer"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { jsPDF } from "jspdf"
+import 'jspdf-autotable'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 // Custom hook for chat functionality
 const useFlaskChat = () => {
@@ -153,6 +156,444 @@ const useFlaskChat = () => {
     setLastNewMessageId
   }
 }
+
+// Function to convert markdown to PDF with improved rendering
+const downloadAsPDF = (content, title = "AIlign Report") => {
+  // Create a new PDF document
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  });
+  
+  // Set PDF metadata
+  doc.setProperties({
+    title: title,
+    subject: "AI Investment Analysis",
+    author: "AIlign",
+    keywords: "AI, ROI, Investment, Analysis",
+    creator: "AIlign Advisor"
+  });
+  
+  // Theme colors
+  const colors = {
+    primary: [0, 102, 204], // Blue
+    secondary: [22, 52, 92], // Dark blue
+    accent: [72, 161, 252], // Light blue
+    text: [60, 60, 60], // Dark gray
+    lightText: [120, 120, 120], // Light gray
+    background: [245, 247, 250], // Light background
+    primaryLight: [230, 240, 255] // Light blue background
+  };
+  
+  // Add a background pattern
+  doc.setFillColor(...colors.background);
+  doc.rect(0, 0, 210, 297, 'F');
+  
+  // Add decorative element at the top
+  doc.setFillColor(...colors.accent);
+  doc.rect(0, 0, 5, 297, 'F');
+  
+  // Add the logo/title header with gradient-like effect
+  doc.setFillColor(...colors.primary);
+  doc.rect(0, 0, 210, 25, 'F');
+  
+  // Add decorative elements to header
+  doc.setFillColor(...colors.secondary);
+  doc.rect(0, 25, 210, 2, 'F');
+  
+  // Small geometric shapes for modern design (using light color instead of transparency)
+  doc.setFillColor(255, 255, 255);
+  doc.circle(180, 12, 15, 'F');
+  doc.circle(160, 5, 7, 'F');
+  
+  // Add logo/title
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.text("AIlign", 15, 15);
+  
+  // Add subtitle
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text("AI Investment Alignment Advisor", 60, 15);
+  
+  // Add report generation info
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.text(`Generated: ${new Date().toLocaleString()}`, 15, 22);
+  
+  // Reset font for content
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(...colors.text);
+  
+  // Start content area
+  let yPos = 40;
+  
+  // Add title with box
+  doc.setFillColor(250, 250, 255);
+  doc.setDrawColor(...colors.primary);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(15, yPos - 10, 180, 15, 2, 2, 'FD');
+  
+  doc.setFontSize(16);
+  doc.setTextColor(...colors.primary);
+  doc.setFont('helvetica', 'bold');
+  doc.text(title, 20, yPos - 1);
+  yPos += 15;
+  
+  // Add a decorative line
+  doc.setDrawColor(...colors.accent);
+  doc.setLineWidth(0.5);
+  for (let i = 0; i < 20; i++) {
+    doc.line(15 + (i * 9), yPos, 20 + (i * 9), yPos);
+  }
+  yPos += 8;
+  
+  // Reset font for content
+  doc.setFontSize(11);
+  doc.setTextColor(...colors.text);
+  doc.setFont('helvetica', 'normal');
+  
+  // Helper function to extract formatting markers from text
+  const extractFormatting = (text) => {
+    // First, clean all escaped characters
+    let processedText = text
+      .replace(/\\\*/g, '§ASTERISK§') // Replace escaped asterisks with placeholder
+      .replace(/\\\\/g, '§BACKSLASH§') // Replace double backslashes with placeholder
+      .replace(/\\\$/g, '§DOLLAR§') // Fix dollar signs with backslashes
+      .replace(/\\_/g, '§UNDERSCORE§') // Fix underscores
+      .replace(/\\\(/g, '§OPENPAREN§') // Fix parentheses
+      .replace(/\\\)/g, '§CLOSEPAREN§') // Fix parentheses
+      .replace(/\\n/g, '\n'); // Replace \n with actual newlines
+    
+    // Track formatting
+    const formats = [];
+    
+    // Find bold text
+    const boldRegex = /\*\*(.*?)\*\*|__(.*?)__/g;
+    let boldMatch;
+    while ((boldMatch = boldRegex.exec(processedText)) !== null) {
+      const text = boldMatch[1] || boldMatch[2];
+      const start = boldMatch.index;
+      const end = start + boldMatch[0].length;
+      formats.push({
+        type: 'bold',
+        text: text,
+        start: start,
+        end: end,
+        original: boldMatch[0]
+      });
+    }
+    
+    // Find italic text
+    const italicRegex = /(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)|_(.*?)_/g;
+    let italicMatch;
+    while ((italicMatch = italicRegex.exec(processedText)) !== null) {
+      const text = italicMatch[1] || italicMatch[2];
+      const start = italicMatch.index;
+      const end = start + italicMatch[0].length;
+      formats.push({
+        type: 'italic',
+        text: text,
+        start: start,
+        end: end,
+        original: italicMatch[0]
+      });
+    }
+    
+    // Sort formats by start position
+    formats.sort((a, b) => a.start - b.start);
+    
+    // Replace all placeholders
+    processedText = processedText
+      .replace(/§ASTERISK§/g, '*')
+      .replace(/§BACKSLASH§/g, '\\')
+      .replace(/§DOLLAR§/g, '$')
+      .replace(/§UNDERSCORE§/g, '_')
+      .replace(/§OPENPAREN§/g, '(')
+      .replace(/§CLOSEPAREN§/g, ')');
+    
+    return { text: processedText, formats };
+  };
+  
+  // Helper function to clean text of markdown syntax
+  const cleanText = (text) => {
+    return text
+      .replace(/\\\*/g, '*') // Replace escaped asterisks with actual asterisks
+      .replace(/\\\\/g, '\\') // Replace double backslashes with single backslash
+      .replace(/\\([^\\])/g, '$1') // Remove escape character but keep the character it was escaping
+      .replace(/\\\$/g, '$') // Fix dollar signs with backslashes
+      .replace(/\\_/g, '_') // Fix underscores
+      .replace(/\\\(/g, '(') // Fix parentheses
+      .replace(/\\\)/g, ')') // Fix parentheses
+      .replace(/\\n/g, '\n') // Replace \n with actual newlines
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markers
+      .replace(/__(.*?)__/g, '$1') // Remove bold markers
+      .replace(/\*(.*?)\*/g, '$1') // Remove italic markers
+      .replace(/_(.*?)_/g, '$1'); // Remove italic markers
+  };
+  
+  // Parse markdown content
+  // Split by lines and process by markdown elements
+  const lines = content.split('\n');
+  let inCodeBlock = false;
+  let inList = false;
+  let codeBlockContent = [];
+  let listIndentLevel = 0;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    // Check if we need a new page
+    if (yPos > 270) {
+      doc.addPage();
+      
+      // Add background pattern to new page
+      doc.setFillColor(...colors.background);
+      doc.rect(0, 0, 210, 297, 'F');
+      
+      // Add decorative element on the side
+      doc.setFillColor(...colors.accent);
+      doc.rect(0, 0, 5, 297, 'F');
+      
+      yPos = 20;
+    }
+    
+    // Handle code blocks
+    if (line.startsWith('```')) {
+      if (!inCodeBlock) {
+        // Start of code block
+        inCodeBlock = true;
+        codeBlockContent = [];
+        continue;
+      } else {
+        // End of code block
+        inCodeBlock = false;
+        
+        // Draw code block background with rounded corners and shadow effect
+        const blockHeight = codeBlockContent.length * 6 + 10;
+        
+        // Add shadow effect (using gray instead of transparency)
+        doc.setFillColor(220, 220, 220);
+        doc.roundedRect(17, yPos - 3, 180, blockHeight, 3, 3, 'F');
+        
+        // Draw code block
+        doc.setFillColor(245, 245, 250);
+        doc.setDrawColor(230, 230, 235);
+        doc.roundedRect(15, yPos - 5, 180, blockHeight, 3, 3, 'FD');
+        
+        // Draw code text
+        doc.setFont('courier', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(80, 80, 80);
+        
+        for (let j = 0; j < codeBlockContent.length; j++) {
+          doc.text(cleanText(codeBlockContent[j]), 20, yPos);
+          yPos += 6;
+        }
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(11);
+        doc.setTextColor(...colors.text);
+        yPos += 5;
+        continue;
+      }
+    }
+    
+    if (inCodeBlock) {
+      codeBlockContent.push(line);
+      continue;
+    }
+    
+    // Handle headings
+    if (line.startsWith('# ')) {
+      // Add heading with background (using light blue instead of transparency)
+      doc.setFillColor(...colors.primaryLight);
+      doc.rect(15, yPos - 7, 180, 12, 'F');
+      
+      // Add heading text
+      doc.setFontSize(16);
+      doc.setTextColor(...colors.primary);
+      doc.setFont('helvetica', 'bold');
+      doc.text(cleanText(line.substring(2)), 15, yPos);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...colors.text);
+      doc.setFontSize(11);
+      yPos += 10;
+    }
+    else if (line.startsWith('## ')) {
+      // Add subheading with underline
+      doc.setFontSize(14);
+      doc.setTextColor(...colors.primary);
+      doc.setFont('helvetica', 'bold');
+      const subheadingText = cleanText(line.substring(3));
+      doc.text(subheadingText, 15, yPos);
+      
+      // Add underline
+      const textWidth = doc.getTextWidth(subheadingText);
+      doc.setDrawColor(...colors.primary);
+      doc.setLineWidth(0.5);
+      doc.line(15, yPos + 1, 15 + textWidth, yPos + 1);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...colors.text);
+      doc.setFontSize(11);
+      yPos += 8;
+    }
+    else if (line.startsWith('### ')) {
+      doc.setFontSize(12);
+      doc.setTextColor(...colors.primary);
+      doc.setFont('helvetica', 'bold');
+      doc.text(cleanText(line.substring(4)), 15, yPos);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...colors.text);
+      doc.setFontSize(11);
+      yPos += 7;
+    }
+    else if (line.startsWith('#### ')) {
+      doc.setFontSize(11);
+      doc.setTextColor(...colors.primary);
+      doc.setFont('helvetica', 'bold');
+      doc.text(cleanText(line.substring(5)), 15, yPos);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...colors.text);
+      doc.setFontSize(11);
+      yPos += 7;
+    }
+    // Handle bullet lists
+    else if (line.startsWith('- ') || line.startsWith('* ')) {
+      const { text: rawText, formats } = extractFormatting(line.substring(2));
+      const bulletText = cleanText(line.substring(2));
+      const splitText = doc.splitTextToSize(bulletText, 170);
+      
+      // Create a custom bullet point
+      doc.setFillColor(...colors.primary);
+      doc.circle(16, yPos - 2, 1.5, 'F');
+      
+      // If we have formatting, apply it
+      if (formats.length > 0) {
+        // For simplicity, we just make the whole bullet point bold
+        doc.setFont('helvetica', 'bold');
+        doc.text(splitText, 20, yPos);
+        doc.setFont('helvetica', 'normal');
+      } else {
+        doc.text(splitText, 20, yPos);
+      }
+      
+      yPos += splitText.length * 6 + 2;
+    }
+    // Handle numbered lists
+    else if (/^\d+\.\s/.test(line)) {
+      const numberMatch = line.match(/^(\d+)\.\s(.*)/);
+      if (numberMatch) {
+        const number = numberMatch[1];
+        const { text: rawText, formats } = extractFormatting(numberMatch[2]);
+        const text = cleanText(numberMatch[2]);
+        const splitText = doc.splitTextToSize(text, 170);
+        
+        // Add number with a small circle behind it (using light blue instead of transparency)
+        doc.setFillColor(...colors.primaryLight);
+        doc.circle(13, yPos - 2, 5, 'F');
+        
+        doc.setTextColor(...colors.primary);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${number}.`, 11, yPos);
+        
+        // If we have formatting, apply it
+        if (formats.length > 0) {
+          // For simplicity, we'll make the whole line bold
+          doc.setTextColor(...colors.text);
+          doc.setFont('helvetica', 'bold');
+          doc.text(splitText, 20, yPos);
+          doc.setFont('helvetica', 'normal');
+        } else {
+          doc.setTextColor(...colors.text);
+          doc.setFont('helvetica', 'normal');
+          doc.text(splitText, 20, yPos);
+        }
+        
+        yPos += splitText.length * 6 + 2;
+      }
+    }
+    // Handle text with formatting
+    else if (line.includes('*') || line.includes('_') || line.includes('\\')) {
+      const { text: processedText, formats } = extractFormatting(line);
+      
+      // If we have bold or italic formatting
+      if (formats.length > 0) {
+        // For simplicity, we'll just apply one style to the whole line
+        // In a more complex implementation, you would split the text and style each part
+        
+        const hasBold = formats.some(f => f.type === 'bold');
+        const hasItalic = formats.some(f => f.type === 'italic');
+        
+        if (hasBold) {
+          doc.setFont('helvetica', 'bold');
+        } else if (hasItalic) {
+          doc.setFont('helvetica', 'italic');
+        }
+        
+        const cleanedText = cleanText(line);
+        const splitText = doc.splitTextToSize(cleanedText, 175);
+        doc.text(splitText, 15, yPos);
+        
+        // Reset font
+        doc.setFont('helvetica', 'normal');
+        
+        yPos += splitText.length * 6 + 2;
+      } else {
+        // No recognized formatting, just clean and display
+        const cleanedText = cleanText(line);
+        const splitText = doc.splitTextToSize(cleanedText, 175);
+        doc.text(splitText, 15, yPos);
+        
+        yPos += splitText.length * 6 + 2;
+      }
+    }
+    // Empty line (paragraph break)
+    else if (line === '') {
+      yPos += 4;
+    }
+    // Regular text with possible escape characters
+    else {
+      const processedText = cleanText(line);
+      const splitText = doc.splitTextToSize(processedText, 175);
+      doc.text(splitText, 15, yPos);
+      yPos += splitText.length * 6 + 2;
+    }
+  }
+  
+  // Add footer with page numbers to all pages
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    
+    // Add footer background
+    doc.setFillColor(...colors.primary);
+    doc.rect(0, 282, 210, 15, 'F');
+    
+    // Add decorative elements
+    doc.setFillColor(...colors.secondary);
+    doc.rect(0, 280, 210, 2, 'F');
+    
+    // Small geometric shapes for design (using white instead of transparency)
+    doc.setFillColor(255, 255, 255);
+    doc.circle(180, 288, 8, 'F');
+    doc.circle(195, 292, 5, 'F');
+    
+    // Add page number and branding
+    doc.setFontSize(9);
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Page ${i} of ${pageCount}`, 15, 289);
+    doc.text(`Generated by AIlign | AI Investment Alignment Advisor`, 195, 289, { align: 'right' });
+  }
+  
+  // Save the PDF with a descriptive name
+  const fileName = `AIlign_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
+  doc.save(fileName);
+};
 
 export default function ChatInterface() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -925,6 +1366,15 @@ export default function ChatInterface() {
                                     <span>Copy</span>
                                   </>
                                 )}
+                              </Button>
+                              <Button
+                                onClick={() => downloadAsPDF(message.content, "AIlign Investment Report")}
+                                size="sm"
+                                variant="outline"
+                                className="h-7 px-3 text-blue-600 hover:text-blue-700 border border-blue-200 hover:bg-blue-50 transition-all rounded-full flex items-center gap-1"
+                              >
+                                <FileDown className="h-3 w-3" />
+                                <span>Download Report as PDF</span>
                               </Button>
                             </div>
                           </div>
