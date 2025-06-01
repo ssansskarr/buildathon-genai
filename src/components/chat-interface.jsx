@@ -19,6 +19,7 @@ const useFlaskChat = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [controller, setController] = useState(null)
   const [isInterruptible, setIsInterruptible] = useState(false)
+  const [lastNewMessageId, setLastNewMessageId] = useState(null)
 
   const handleInputChange = (e) => {
     setInput(e.target.value)
@@ -53,11 +54,17 @@ const useFlaskChat = () => {
       const data = await response.json()
       
       if (response.ok) {
+        // Generate a unique ID for the new message
+        const newMessageId = Date.now() + 1
+        
         // Add AI response to the chat
         setMessages((prev) => [
           ...prev,
-          { id: (Date.now() + 1).toString(), role: "assistant", content: data.response }
+          { id: newMessageId.toString(), role: "assistant", content: data.response }
         ])
+        
+        // Set the last new message ID to trigger typewriter effect
+        setLastNewMessageId(newMessageId.toString())
       } else {
         console.error("Error from backend:", data.error)
         // Add error message
@@ -110,7 +117,9 @@ const useFlaskChat = () => {
     handleInputChange,
     handleSubmit,
     interruptResponse,
-    setMessages
+    setMessages,
+    lastNewMessageId,
+    setLastNewMessageId
   }
 }
 
@@ -126,6 +135,7 @@ export default function ChatInterface() {
   const [textDisplayMode, setTextDisplayMode] = useState('truncate') // 'truncate', 'wrap', or 'normal'
   const [isTyping, setIsTyping] = useState(false) // Track if the typewriter is currently typing
   const [interruptTyping, setInterruptTyping] = useState(false) // State to trigger interruption
+  const [isInitialLoad, setIsInitialLoad] = useState(true) // Track if we're in the initial load phase
   
   // Use our custom Flask chat hook instead of the AI SDK hook
   const { 
@@ -136,11 +146,14 @@ export default function ChatInterface() {
     isLoading, 
     isInterruptible,
     interruptResponse,
-    setMessages 
+    setMessages,
+    lastNewMessageId,
+    setLastNewMessageId
   } = useFlaskChat()
   const messagesEndRef = useRef(null)
   const scrollAreaRef = useRef(null)
   const sidebarRef = useRef(null)
+  const timeoutRef = useRef(null)
 
   // Load chat history and current chat ID from localStorage on mount
   useEffect(() => {
@@ -175,6 +188,14 @@ export default function ChatInterface() {
       setCurrentChatId(newChatId)
       localStorage.setItem('currentChatId', newChatId)
     }
+    
+    // Set initial load to false after a delay
+    const timer = setTimeout(() => {
+      setIsInitialLoad(false)
+    }, 500)
+    
+    timeoutRef.current = timer
+    return () => clearTimeout(timer)
   }, [setMessages])
 
   // Save chat history to localStorage whenever it changes
@@ -292,8 +313,20 @@ export default function ChatInterface() {
     setCurrentChatId(newChatId)
     localStorage.setItem('currentChatId', newChatId)
     
+    // Reset typewriter-related state
+    setLastNewMessageId(null)
+    setIsInitialLoad(true)
+    
     // Clear messages
     setMessages([])
+    
+    // Reset isInitialLoad after a short delay
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+    timeoutRef.current = setTimeout(() => {
+      setIsInitialLoad(false)
+    }, 100)
   }
 
   const handleLoadChat = (chatId) => {
@@ -301,6 +334,10 @@ export default function ChatInterface() {
     if (messages.length > 0) {
       // Already handled by the useEffect
     }
+    
+    // Reset typewriter-related state
+    setIsInitialLoad(true)
+    setLastNewMessageId(null)
     
     // Set current chat ID
     setCurrentChatId(chatId)
@@ -313,6 +350,14 @@ export default function ChatInterface() {
     } else {
       setMessages([])
     }
+    
+    // Reset isInitialLoad after a short delay
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+    timeoutRef.current = setTimeout(() => {
+      setIsInitialLoad(false)
+    }, 100)
   }
 
   const handleCopyText = (text, messageId) => {
@@ -434,12 +479,28 @@ export default function ChatInterface() {
     setInterruptTyping(true)
   }
   
-  // Set isTyping to true when a new AI message is added
+  // Replace the existing useEffect for setting isTyping with this more robust version
   useEffect(() => {
-    if (messages.length > 0 && messages[messages.length - 1].role === 'assistant') {
+    if (messages.length > 0 && 
+        messages[messages.length - 1].role === 'assistant' && 
+        messages[messages.length - 1].id === lastNewMessageId && 
+        !isInitialLoad) {
       setIsTyping(true)
     }
-  }, [messages.length])
+  }, [messages, lastNewMessageId, isInitialLoad])
+
+  // Ensure we clean up properly when unmounting
+  useEffect(() => {
+    return () => {
+      // Clear any pending timeouts
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+      // Reset typewriter state
+      setIsTyping(false)
+      setInterruptTyping(false)
+    }
+  }, [])
 
   return (
     <div className="flex h-screen bg-background text-foreground">
@@ -749,10 +810,10 @@ export default function ChatInterface() {
                               )}
                             </div>
                             <div className="markdown-content text-foreground leading-relaxed">
-                              {idx === messages.length - 1 ? (
+                              {(idx === messages.length - 1 && message.id === lastNewMessageId && !isInitialLoad) ? (
                                 <TypeWriter 
                                   text={message.content} 
-                                  speed={10} 
+                                  speed={3} 
                                   isInterrupted={interruptTyping}
                                   onComplete={handleTypewriterComplete}
                                 />

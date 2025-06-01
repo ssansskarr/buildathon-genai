@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
-export default function TypeWriter({ text, speed = 10, isInterrupted = false, onComplete = () => {} }) {
+export default function TypeWriter({ text, speed = 25, isInterrupted = false, onComplete = () => {} }) {
   const [displayText, setDisplayText] = useState("")
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isComplete, setIsComplete] = useState(false)
@@ -75,7 +75,7 @@ export default function TypeWriter({ text, speed = 10, isInterrupted = false, on
             <table className="w-full border-collapse my-4 rounded-lg overflow-hidden" {...props} />
           ),
           thead: ({node, ...props}) => (
-            <thead className="bg-emerald-900/20" {...props} />
+            <thead className="bg-blue-900/20" {...props} />
           ),
           tbody: ({node, ...props}) => (
             <tbody {...props} />
@@ -84,7 +84,7 @@ export default function TypeWriter({ text, speed = 10, isInterrupted = false, on
             <tr className="border-b border-[#2a2a2a]/50 hover:bg-[#1a1a1a]/30" {...props} />
           ),
           th: ({node, ...props}) => (
-            <th className="p-3 text-left font-medium text-emerald-300" {...props} />
+            <th className="p-3 text-left font-medium text-blue-300" {...props} />
           ),
           td: ({node, ...props}) => (
             <td className="p-3" {...props} />
