@@ -19,7 +19,9 @@ const useFlaskChat = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [controller, setController] = useState(null)
   const [isInterruptible, setIsInterruptible] = useState(false)
+  const [processingStage, setProcessingStage] = useState(0) // 0: none, 1: reading query, 2: analyzing knowledge base, 3: generating response
   const [lastNewMessageId, setLastNewMessageId] = useState(null)
+  const [userQuery, setUserQuery] = useState("") // Store the user's query for display
 
   const handleInputChange = (e) => {
     setInput(e.target.value)
@@ -29,20 +31,45 @@ const useFlaskChat = () => {
     e.preventDefault()
     if (!input.trim()) return
 
+    // Store the user's query
+    const queryText = input.trim()
+    setUserQuery(queryText)
+
     // Add user message to the chat
-    const userMessage = { id: Date.now().toString(), role: "user", content: input }
+    const userMessage = { id: Date.now().toString(), role: "user", content: queryText }
     setMessages((prev) => [...prev, userMessage])
     setInput("")
     setIsLoading(true)
+    setProcessingStage(1) // Reading query stage
 
     try {
+      // Wait 2 seconds for the first stage
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // Move to analyzing knowledge base stage
+      setProcessingStage(2)
+      
       // Create an AbortController to allow cancelling the request
       const abortController = new AbortController()
       setController(abortController)
       setIsInterruptible(true)
 
-      // Call Flask backend API
-      const response = await fetch("http://localhost:5000/api/chat", {
+      // Wait 4 seconds for the second stage
+      await new Promise(resolve => setTimeout(resolve, 4000))
+      
+      // Move to generating response stage
+      setProcessingStage(3)
+
+      // Wait 6 seconds for the third stage
+      await new Promise(resolve => setTimeout(resolve, 6000))
+
+      // Determine which API endpoint to use
+      const apiEndpoint = window.location.hostname === 'localhost' 
+        ? "http://localhost:5000/api/chat"  // Local development
+        : "/api/chat";                      // Production (Next.js API route)
+
+      // Call backend API
+      const response = await fetch(apiEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -60,7 +87,7 @@ const useFlaskChat = () => {
         // Add AI response to the chat
         setMessages((prev) => [
           ...prev,
-          { id: newMessageId.toString(), role: "assistant", content: data.response }
+          { id: newMessageId.toString(), role: "assistant", content: data.response || data.text || "No response received" }
         ])
         
         // Set the last new message ID to trigger typewriter effect
@@ -82,14 +109,14 @@ const useFlaskChat = () => {
       if (error.name === 'AbortError') {
         console.log('Request was aborted')
       } else {
-        console.error("Failed to fetch from Flask backend:", error)
+        console.error("Failed to fetch from backend:", error)
         // Add error message
         setMessages((prev) => [
           ...prev,
           { 
             id: (Date.now() + 1).toString(), 
             role: "assistant", 
-            content: "Sorry, I couldn't connect to the backend service. Please check if the Flask server is running." 
+            content: "Sorry, I couldn't connect to the backend service. Please check if the server is running." 
           }
         ])
       }
@@ -97,6 +124,7 @@ const useFlaskChat = () => {
       setIsLoading(false)
       setController(null)
       setIsInterruptible(false)
+      setProcessingStage(0) // Reset processing stage
     }
   }
 
@@ -106,6 +134,7 @@ const useFlaskChat = () => {
       setIsLoading(false)
       setController(null)
       setIsInterruptible(false)
+      setProcessingStage(0) // Reset processing stage
     }
   }
 
@@ -114,6 +143,8 @@ const useFlaskChat = () => {
     input,
     isLoading,
     isInterruptible,
+    processingStage,
+    userQuery,
     handleInputChange,
     handleSubmit,
     interruptResponse,
@@ -135,9 +166,8 @@ export default function ChatInterface() {
   const [textDisplayMode, setTextDisplayMode] = useState('truncate') // 'truncate', 'wrap', or 'normal'
   const [isTyping, setIsTyping] = useState(false) // Track if the typewriter is currently typing
   const [interruptTyping, setInterruptTyping] = useState(false) // State to trigger interruption
-  const [isInitialLoad, setIsInitialLoad] = useState(true) // Track if we're in the initial load phase
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
   
-  // Use our custom Flask chat hook instead of the AI SDK hook
   const { 
     messages, 
     input, 
@@ -145,6 +175,8 @@ export default function ChatInterface() {
     handleSubmit, 
     isLoading, 
     isInterruptible,
+    processingStage,
+    userQuery,
     interruptResponse,
     setMessages,
     lastNewMessageId,
@@ -502,6 +534,58 @@ export default function ChatInterface() {
     }
   }, [])
 
+  // Set isInitialLoad to false after initial render
+  useEffect(() => {
+    if (messages.length > 0) {
+      setIsInitialLoad(false)
+    }
+  }, [messages.length])
+
+  // Render the processing stages component
+  const renderProcessingStages = () => {
+    if (!isLoading) return null;
+    
+    // Define stage labels
+    const stages = [
+      { num: 1, label: "Reading query", query: userQuery },
+      { num: 2, label: "Analyzing knowledge base" },
+      { num: 3, label: "Generating response" }
+    ];
+    
+    return (
+      <div className="flex items-start gap-3 animate-slide-up">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0 mt-1">
+          <Sparkles className="h-4 w-4 text-white" />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center mb-1">
+            <span className="text-sm font-medium text-foreground">AI Cost Optimizer</span>
+          </div>
+          <div className="flex flex-col">
+            {stages.map((stage, index) => (
+              <div key={stage.num} className="relative">
+                {processingStage >= stage.num && (
+                  <div className="flex items-center gap-2 py-1.5">
+                    <div className="w-2 h-2 rounded-full bg-blue-500 z-10"></div>
+                    <span 
+                      className={`text-sm ${processingStage === stage.num ? 'text-foreground animate-pulse-text' : 'text-muted-foreground'}`}
+                    >
+                      {stage.label}
+                      {stage.num === 1 && stage.query && processingStage === 1 && (
+                        <span className="text-blue-400 ml-1">"{stage.query.length > 20 ? stage.query.slice(0, 20) + '...' : stage.query}"</span>
+                      )}
+                      {processingStage === stage.num && <span className="animate-blink ml-1">•</span>}
+                    </span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="flex h-screen bg-background text-foreground">
       {/* Animated Background */}
@@ -849,22 +933,7 @@ export default function ChatInterface() {
                     </div>
                   ))}
 
-                  {isLoading && (
-                    <div className="flex items-start gap-3 animate-slide-up">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0 mt-1 animate-pulse">
-                        <Sparkles className="h-4 w-4 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center mb-1">
-                          <span className="text-sm font-medium text-foreground">AIlign</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Loader2 className="h-4 w-4 text-blue-400 animate-spin" />
-                          <span className="text-sm text-muted-foreground">Analyzing your request...</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  {isLoading && renderProcessingStages()}
 
                   <div ref={messagesEndRef} />
                 </div>
@@ -896,7 +965,26 @@ export default function ChatInterface() {
         </div>
       </div>
 
+      {/* Add the animation styles */}
       <style jsx global>{`
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+        
+        .animate-blink {
+          animation: blink 1s infinite;
+        }
+        
+        @keyframes pulse-text {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
+        
+        .animate-pulse-text {
+          animation: pulse-text 1.5s infinite;
+        }
+        
         .markdown-content h1, .markdown-content h2, .markdown-content h3 {
           margin-top: 1.5rem;
           margin-bottom: 1rem;

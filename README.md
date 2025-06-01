@@ -45,7 +45,7 @@ cd flask_backend
 pip install -r requirements.txt
 ```
 
-3. Create a `.env` file based on `.env.example` and add your Gemini API key.
+3. Create a `.env` file based on `.env.example` and add your Lyzr API key.
 
 4. Run the Flask server:
 ```bash
@@ -64,7 +64,7 @@ start-app.bat
 ## Features
 
 - Interactive chat interface with AI cost optimization advisor
-- Real-time responses from Google's Gemini model
+- Real-time responses from Lyzr Agent Studio using OpenAI o3 model
 - Cost reduction analysis for AI implementations
 - LLM selection recommendations
 - ROI calculations for AI projects
@@ -74,4 +74,4 @@ start-app.bat
 
 - **Frontend**: Next.js, React, Tailwind CSS
 - **Backend**: Flask, Python
-- **AI**: Google Gemini API
+- **AI**: Lyzr Agent Studio API with OpenAI o3 model
