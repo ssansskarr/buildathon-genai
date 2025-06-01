@@ -120,3 +120,124 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Add styles for markdown content */
+.markdown-content {
+  @apply text-gray-200;
+}
+
+.markdown-content h1 {
+  @apply text-2xl font-bold mb-4 mt-6;
+}
+
+.markdown-content h2 {
+  @apply text-xl font-bold mb-3 mt-5;
+}
+
+.markdown-content h3 {
+  @apply text-lg font-bold mb-2 mt-4;
+}
+
+.markdown-content p {
+  @apply mb-4;
+}
+
+.markdown-content ul {
+  @apply list-disc pl-6 mb-4;
+}
+
+.markdown-content ol {
+  @apply list-decimal pl-6 mb-4;
+}
+
+.markdown-content li {
+  @apply mb-1;
+}
+
+.markdown-content a {
+  @apply text-emerald-400 hover:text-emerald-300 underline;
+}
+
+.markdown-content blockquote {
+  @apply border-l-4 border-emerald-500 pl-4 italic my-4;
+}
+
+.markdown-content pre {
+  @apply bg-[#1a1a1a] p-4 rounded-lg my-4 overflow-x-auto;
+}
+
+.markdown-content code {
+  @apply bg-[#1a1a1a] px-1 py-0.5 rounded;
+}
+
+/* Improved table styling */
+.markdown-content table {
+  @apply w-full border-collapse my-4 overflow-x-auto block;
+  max-width: 100%;
+}
+
+.markdown-content thead {
+  @apply bg-[#1a1a1a];
+}
+
+.markdown-content th {
+  @apply bg-[#1a1a1a] font-bold px-4 py-2 border border-[#2a2a2a] text-left;
+}
+
+.markdown-content td {
+  @apply border border-[#2a2a2a] px-4 py-2;
+  word-break: normal;
+}
+
+.markdown-content tr {
+  @apply border-b border-[#2a2a2a];
+}
+
+.markdown-content tr:nth-child(even) {
+  @apply bg-[#171717];
+}
+
+.markdown-content hr {
+  @apply border-[#2a2a2a] my-6;
+}
+
+/* Typing animation */
+.typing-animation {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.typing-animation .dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #10b981; /* emerald-500 */
+  opacity: 0.7;
+}
+
+.typing-animation .dot:nth-child(1) {
+  animation: typing-bounce 1.4s infinite ease-in-out;
+  animation-delay: 0ms;
+}
+
+.typing-animation .dot:nth-child(2) {
+  animation: typing-bounce 1.4s infinite ease-in-out;
+  animation-delay: 200ms;
+}
+
+.typing-animation .dot:nth-child(3) {
+  animation: typing-bounce 1.4s infinite ease-in-out;
+  animation-delay: 400ms;
+}
+
+@keyframes typing-bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}

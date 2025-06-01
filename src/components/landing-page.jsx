@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { TrendingDown, ArrowRight, DollarSign, Target, Users, Brain, Calculator } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 
@@ -181,7 +182,7 @@ export default function LandingPage() {
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center animate-pulse">
                 <DollarSign className="h-4 w-4 text-white" />
               </div>
-              <span className="font-bold text-xl">AI Cost Optimizer</span>
+              <Link href="/" className="font-bold text-xl hover:text-emerald-400 transition-colors">AI Cost Optimizer</Link>
             </div>
             <div className="hidden md:flex items-center gap-6">
               <a href="#features" className="text-gray-300 hover:text-emerald-400 transition-colors">
@@ -190,6 +191,9 @@ export default function LandingPage() {
               <a href="#use-cases" className="text-gray-300 hover:text-emerald-400 transition-colors">
                 Use Cases
               </a>
+              <Link href="/chat" className="text-emerald-400 hover:text-emerald-300 transition-colors">
+                Open Chat
+              </Link>
             </div>
             <Button
               onClick={handleStartOptimization}
@@ -227,13 +231,14 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                onClick={handleStartOptimization}
-                className="bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 text-white rounded-lg px-8 py-3 text-lg font-medium transform hover:scale-105 transition-all animate-bounce-subtle"
-              >
-                Start Cost Analysis
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              <Link href="/chat">
+                <Button
+                  className="bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 text-white rounded-lg px-8 py-3 text-lg font-medium transform hover:scale-105 transition-all animate-bounce-subtle"
+                >
+                  Start Cost Analysis
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
             </div>
           </div>
 
@@ -359,17 +364,41 @@ export default function LandingPage() {
                 Start your AI cost optimization journey today. Get personalized recommendations, ROI calculations, and
                 architectural guidance from our intelligent advisor.
               </p>
-              <Button
-                onClick={handleStartOptimization}
-                className="bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 text-white rounded-lg px-8 py-3 text-lg font-medium transform hover:scale-105 transition-all animate-pulse"
-              >
-                Start Free Analysis
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              <Link href="/chat">
+                <Button
+                  className="bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 text-white rounded-lg px-8 py-3 text-lg font-medium transform hover:scale-105 transition-all animate-pulse"
+                >
+                  Start Free Analysis
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="py-8 bg-[#0a0a0a] border-t border-[#2a2a2a]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between">
+            <div className="flex items-center gap-2 mb-4 md:mb-0">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
+                <DollarSign className="h-4 w-4 text-white" />
+              </div>
+              <span className="font-bold text-xl">AI Cost Optimizer</span>
+            </div>
+            <div className="flex items-center gap-6">
+              <Link href="/" className="text-gray-400 hover:text-emerald-400 transition-colors">Home</Link>
+              <Link href="/chat" className="text-gray-400 hover:text-emerald-400 transition-colors">Chat</Link>
+              <a href="#features" className="text-gray-400 hover:text-emerald-400 transition-colors">Features</a>
+              <a href="#use-cases" className="text-gray-400 hover:text-emerald-400 transition-colors">Use Cases</a>
+            </div>
+            <div className="mt-4 md:mt-0 text-gray-500 text-sm">
+              © 2024 AI Cost Optimizer. All rights reserved.
+            </div>
+          </div>
+        </div>
+      </footer>
 
       <style jsx>{`
         @keyframes fade-in {

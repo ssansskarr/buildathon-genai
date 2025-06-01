@@ -1,30 +1,103 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { useChat } from "ai/react"
-import { Send, Plus, Menu, Sparkles, User, MoreHorizontal, Copy, ThumbsUp, ThumbsDown, Trash2, X } from 'lucide-react'
+import { Send, Plus, Menu, Sparkles, User, Copy, Trash2, Check, Home, Zap, Settings, Loader2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import Link from "next/link"
+import TypeWriter from "@/components/type-writer"
+
+// Custom hook for chat functionality
+const useFlaskChat = () => {
+  const [messages, setMessages] = useState([])
+  const [input, setInput] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleInputChange = (e) => {
+    setInput(e.target.value)
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!input.trim()) return
+
+    // Add user message to the chat
+    const userMessage = { id: Date.now().toString(), role: "user", content: input }
+    setMessages((prev) => [...prev, userMessage])
+    setInput("")
+    setIsLoading(true)
+
+    try {
+      // Call Flask backend API
+      const response = await fetch("http://localhost:5000/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages: [...messages, userMessage] }),
+      })
+
+      const data = await response.json()
+      
+      if (response.ok) {
+        // Add AI response to the chat
+        setMessages((prev) => [
+          ...prev,
+          { id: (Date.now() + 1).toString(), role: "assistant", content: data.response }
+        ])
+      } else {
+        console.error("Error from backend:", data.error)
+        // Add error message
+        setMessages((prev) => [
+          ...prev,
+          { 
+            id: (Date.now() + 1).toString(), 
+            role: "assistant", 
+            content: `Sorry, I encountered an error: ${data.error || "Unknown error"}` 
+          }
+        ])
+      }
+    } catch (error) {
+      console.error("Failed to fetch from Flask backend:", error)
+      // Add error message
+      setMessages((prev) => [
+        ...prev,
+        { 
+          id: (Date.now() + 1).toString(), 
+          role: "assistant", 
+          content: "Sorry, I couldn't connect to the backend service. Please check if the Flask server is running." 
+        }
+      ])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return {
+    messages,
+    input,
+    isLoading,
+    handleInputChange,
+    handleSubmit,
+    setMessages
+  }
+}
 
 export default function ChatInterface() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [chatHistory, setChatHistory] = useState([
-    {
-      id: "1",
-      title: "LLM Cost Comparison Analysis",
-      time: "2h",
-      preview: "Compare costs between GPT-4 and Claude...",
-    },
-    { id: "2", title: "ROI Calculator for AI Agents", time: "1d", preview: "Calculate implementation costs for..." },
-    { id: "3", title: "Agent Architecture Optimization", time: "2d", preview: "How to reduce credit consumption..." },
-    { id: "4", title: "Enterprise AI Budget Planning", time: "1w", preview: "What's the total cost of ownership..." },
-    { id: "5", title: "Cost-Effective Model Selection", time: "2w", preview: "Which model should we use for..." },
-  ])
+  const [chatHistory, setChatHistory] = useState([])
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null)
-  const { messages, input, handleInputChange, handleSubmit, isLoading, setMessages } = useChat()
+  const [copiedMsgId, setCopiedMsgId] = useState(null)
+  const [animateNewMessage, setAnimateNewMessage] = useState(false)
+  
+  // Use our custom Flask chat hook instead of the AI SDK hook
+  const { messages, input, handleInputChange, handleSubmit, isLoading, setMessages } = useFlaskChat()
   const messagesEndRef = useRef(null)
+  const scrollAreaRef = useRef(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -32,6 +105,10 @@ export default function ChatInterface() {
 
   useEffect(() => {
     scrollToBottom()
+    if (messages.length > 0) {
+      setAnimateNewMessage(true)
+      setTimeout(() => setAnimateNewMessage(false), 1000)
+    }
   }, [messages])
 
   const handleDeleteChat = (chatId) => {
@@ -48,19 +125,44 @@ export default function ChatInterface() {
     setMessages([])
   }
 
+  const handleCopyText = (text, messageId) => {
+    navigator.clipboard.writeText(text)
+    setCopiedMsgId(messageId)
+    setTimeout(() => setCopiedMsgId(null), 2000)
+  }
+
   const suggestions = [
-    "Help me calculate the ROI for implementing AI agents in customer service",
-    "Compare the costs of different LLMs for our use case",
-    "What are the best practices for reducing AI operational costs?",
-    "How can I optimize my AI agent architecture to minimize costs?",
+    {
+      text: "Help me calculate the ROI for implementing AI agents in customer service",
+      icon: <Zap className="h-5 w-5 text-emerald-400" />
+    },
+    {
+      text: "Compare the costs of different LLMs for our use case",
+      icon: <Settings className="h-5 w-5 text-emerald-400" />
+    },
+    {
+      text: "What are the best practices for reducing AI operational costs?",
+      icon: <Sparkles className="h-5 w-5 text-emerald-400" />
+    },
+    {
+      text: "How can I optimize my AI agent architecture to minimize costs?",
+      icon: <Zap className="h-5 w-5 text-emerald-400" />
+    },
   ]
 
   return (
     <div className="flex h-screen bg-[#0f0f0f] text-white">
+      {/* Animated Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJncmlkIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPjxwYXRoIGQ9Ik0gNDAgMCBMIDAgMCAwIDQwIiBmaWxsPSJub25lIiBzdHJva2U9IiMxMWIzODEiIHN0cm9rZS13aWR0aD0iMC4yIiBvcGFjaXR5PSIwLjAzIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIiAvPjwvc3ZnPg==')] opacity-30"></div>
+        <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-gradient-to-b from-emerald-900/5 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-gradient-to-t from-emerald-900/5 to-transparent rounded-full blur-3xl"></div>
+      </div>
+
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[#171717] border border-[#2a2a2a] rounded-xl p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+          <div className="bg-[#171717] border border-[#2a2a2a]/70 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl shadow-emerald-900/10 animate-scale-in">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
                 <Trash2 className="h-5 w-5 text-red-400" />
@@ -106,15 +208,15 @@ export default function ChatInterface() {
       {/* Sidebar */}
       <div
         className={`${
-          sidebarOpen ? "w-80" : "w-0"
-        } transition-all duration-300 overflow-hidden bg-[#171717] border-r border-[#2a2a2a]`}
+          sidebarOpen ? "w-72" : "w-0"
+        } transition-all duration-300 overflow-hidden bg-[#0f0f0f]/70 backdrop-blur-md border-r border-[#2a2a2a]/50 shadow-xl z-10`}
       >
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
-          <div className="p-4 border-b border-[#2a2a2a]">
+          <div className="p-4 border-b border-[#2a2a2a]/50">
             <Button 
               onClick={handleNewChat}
-              className="w-full justify-start gap-3 bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white border-none rounded-lg h-11 font-medium transition-all"
+              className="w-full justify-start gap-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white border-none rounded-lg h-11 font-medium transition-all shadow-lg shadow-emerald-900/20"
             >
               <Plus className="h-4 w-4" />
               New analysis
@@ -124,57 +226,79 @@ export default function ChatInterface() {
           {/* Chat History */}
           <ScrollArea className="flex-1 p-2">
             <div className="space-y-1">
-              {chatHistory.map((chat) => (
-                <div
-                  key={chat.id}
-                  className="group relative p-3 rounded-lg hover:bg-[#2a2a2a] cursor-pointer transition-all"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white truncate mb-1">{chat.title}</p>
-                      <p className="text-xs text-gray-400 truncate">{chat.preview}</p>
-                    </div>
-                    <div className="flex items-center gap-1 ml-2">
-                      <span className="text-xs text-gray-500">{chat.time}</span>
-                      <div className="relative">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setShowDeleteConfirm(chat.id)
-                          }}
-                          className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0 hover:bg-red-500/20 hover:text-red-400 transition-all"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+              {chatHistory.length === 0 ? (
+                <div className="p-8 text-center text-gray-500 text-sm flex flex-col items-center">
+                  <div className="w-12 h-12 rounded-full bg-[#1a1a1a] flex items-center justify-center mb-3">
+                    <Sparkles className="h-5 w-5 text-gray-400" />
+                  </div>
+                  No chat history yet
+                  <p className="text-xs text-gray-600 mt-2">Your conversations will appear here</p>
+                </div>
+              ) : (
+                chatHistory.map((chat) => (
+                  <div
+                    key={chat.id}
+                    className="group relative p-3 rounded-lg hover:bg-[#2a2a2a] cursor-pointer transition-all"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white truncate mb-1">{chat.title}</p>
+                        <p className="text-xs text-gray-400 truncate">{chat.preview}</p>
+                      </div>
+                      <div className="flex items-center gap-1 ml-2">
+                        <span className="text-xs text-gray-500">{chat.time}</span>
+                        <div className="relative">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setShowDeleteConfirm(chat.id)
+                            }}
+                            className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0 hover:bg-red-500/20 hover:text-red-400 transition-all"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </ScrollArea>
 
           {/* Sidebar Footer */}
-          <div className="p-4 border-t border-[#2a2a2a]">
-            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#2a2a2a] cursor-pointer">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
-                <Sparkles className="h-4 w-4 text-white" />
+          <div className="p-4 border-t border-[#2a2a2a]/50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#2a2a2a] cursor-pointer">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
+                  <Sparkles className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium">AI Cost Optimizer</p>
+                  <p className="text-xs text-gray-400">Enterprise plan</p>
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">AI Cost Optimizer</p>
-                <p className="text-xs text-gray-400">Enterprise plan</p>
-              </div>
+              <Link href="/">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 px-3 text-gray-400 hover:text-emerald-400 hover:bg-[#2a2a2a] transition-all flex items-center gap-2"
+                >
+                  <Home className="h-4 w-4" />
+                  <span className="text-sm">Home</span>
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col relative overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[#2a2a2a] bg-[#0f0f0f]">
+        <div className="flex items-center justify-between p-4 border-b border-[#2a2a2a]/50 bg-[#0f0f0f]/70 backdrop-blur-md z-10">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
@@ -185,34 +309,45 @@ export default function ChatInterface() {
               <Menu className="h-4 w-4" />
             </Button>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-900/20">
                 <Sparkles className="h-3 w-3 text-white" />
               </div>
               <span className="font-medium text-white">AI Cost Optimizer</span>
             </div>
           </div>
           
-          {/* Clear Chat Button */}
-          {messages.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowDeleteConfirm('current')}
-              className="text-gray-400 hover:text-red-400 hover:bg-red-500/10 h-8 px-3 transition-all"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Clear Chat
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            <Link href="/">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-400 hover:text-emerald-400 hover:bg-[#2a2a2a] h-8 px-3 transition-all flex items-center gap-2"
+              >
+                <Home className="h-4 w-4" />
+                <span className="hidden sm:inline">Back to Home</span>
+              </Button>
+            </Link>
+            {messages.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDeleteConfirm('current')}
+                className="text-gray-400 hover:text-red-400 hover:bg-red-500/10 h-8 px-3 transition-all"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Clear Chat
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Messages Area */}
         <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full">
-            <div className="max-w-3xl mx-auto px-4">
+          <ScrollArea className="h-full" ref={scrollAreaRef}>
+            <div className="max-w-3xl mx-auto px-4 py-6">
               {messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full py-12">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center mb-6 shadow-lg">
+                <div className="flex flex-col items-center justify-center h-full py-12 animate-fade-in">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center mb-6 shadow-lg shadow-emerald-900/20 animate-pulse">
                     <Sparkles className="h-8 w-8 text-white" />
                   </div>
                   <h1 className="text-2xl font-semibold text-white mb-2">How can I help optimize your AI costs?</h1>
@@ -224,109 +359,90 @@ export default function ChatInterface() {
                     {suggestions.map((suggestion, index) => (
                       <button
                         key={index}
-                        onClick={() => handleInputChange({ target: { value: suggestion } })}
-                        className="p-4 text-left bg-[#1a1a1a] hover:bg-[#2a2a2a] border border-[#2a2a2a] rounded-xl transition-all hover:border-[#3a3a3a] group"
+                        onClick={() => handleInputChange({ target: { value: suggestion.text } })}
+                        className="p-4 text-left bg-[#1a1a1a]/60 hover:bg-[#2a2a2a] border border-[#2a2a2a] rounded-xl transition-all hover:border-emerald-500/30 group hover:shadow-lg hover:shadow-emerald-900/10 backdrop-blur-sm"
+                        style={{
+                          animationDelay: `${index * 100}ms`,
+                        }}
                       >
-                        <p className="text-sm text-gray-300 group-hover:text-white">{suggestion}</p>
+                        <div className="flex items-center gap-3 mb-2">
+                          {suggestion.icon}
+                          <div className="h-px flex-1 bg-gradient-to-r from-emerald-500/20 to-transparent"></div>
+                        </div>
+                        <p className="text-sm text-gray-300 group-hover:text-white">{suggestion.text}</p>
                       </button>
                     ))}
                   </div>
                 </div>
               ) : (
-                <div className="py-6 space-y-6">
-                  {messages.map((message) => (
-                    <div key={message.id} className="group">
-                      <div className="flex gap-4">
-                        <Avatar className="w-8 h-8 mt-1 flex-shrink-0">
-                          <AvatarFallback
-                            className={`${
-                              message.role === "assistant"
-                                ? "bg-gradient-to-br from-emerald-400 to-emerald-600"
-                                : "bg-[#2a2a2a]"
-                            }`}
-                          >
-                            {message.role === "assistant" ? (
-                              <Sparkles className="h-4 w-4 text-white" />
-                            ) : (
-                              <User className="h-4 w-4 text-gray-300" />
-                            )}
-                          </AvatarFallback>
-                        </Avatar>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="font-medium text-white">
-                              {message.role === "assistant" ? "AI Cost Optimizer" : "You"}
-                            </span>
+                <div className="space-y-6">
+                  {messages.map((message, idx) => (
+                    <div 
+                      key={message.id} 
+                      className={`${idx === messages.length - 1 && animateNewMessage ? 'animate-slide-up' : ''}`}
+                    >
+                      {message.role === "user" ? (
+                        <div className="flex justify-end mb-2">
+                          <div className="max-w-[85%] px-4 py-2 bg-[#2a2a2a]/50 rounded-t-2xl rounded-bl-2xl text-gray-200">
+                            <p className="whitespace-pre-wrap">{message.content}</p>
                           </div>
-
-                          <div className="prose prose-invert max-w-none">
-                            <p className="text-gray-200 leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                        </div>
+                      ) : (
+                        <div className="flex items-start gap-3 group">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center flex-shrink-0 mt-1">
+                            <Sparkles className="h-4 w-4 text-white" />
                           </div>
-
-                          {message.role === "assistant" && (
-                            <div className="flex items-center gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex-1">
+                            <div className="flex items-center mb-1">
+                              <span className="text-sm font-medium text-white">AI Cost Optimizer</span>
+                            </div>
+                            <div className="markdown-content text-gray-200 leading-relaxed">
+                              {idx === messages.length - 1 ? (
+                                <TypeWriter text={message.content} speed={10} />
+                              ) : (
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                  {message.content}
+                                </ReactMarkdown>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => navigator.clipboard.writeText(message.content)}
-                                className="h-7 px-2 text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
+                                onClick={() => handleCopyText(message.content, message.id)}
+                                className="h-7 px-3 text-gray-400 hover:text-white hover:bg-[#2a2a2a]/70 transition-all rounded-full"
                               >
-                                <Copy className="h-3 w-3 mr-1" />
-                                Copy
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 px-2 text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
-                              >
-                                <ThumbsUp className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 px-2 text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
-                              >
-                                <ThumbsDown className="h-3 w-3" />
+                                {copiedMsgId === message.id ? (
+                                  <>
+                                    <Check className="h-3 w-3 mr-1 text-emerald-400" />
+                                    <span className="text-emerald-400">Copied</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="h-3 w-3 mr-1" />
+                                    <span>Copy</span>
+                                  </>
+                                )}
                               </Button>
                             </div>
-                          )}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   ))}
 
                   {isLoading && (
-                    <div className="group">
-                      <div className="flex gap-4">
-                        <Avatar className="w-8 h-8 mt-1 flex-shrink-0">
-                          <AvatarFallback className="bg-gradient-to-br from-emerald-400 to-emerald-600">
-                            <Sparkles className="h-4 w-4 text-white" />
-                          </AvatarFallback>
-                        </Avatar>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="font-medium text-white">AI Cost Optimizer</span>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <div className="flex space-x-1">
-                              <div
-                                className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
-                                style={{ animationDelay: "0ms" }}
-                              ></div>
-                              <div
-                                className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
-                                style={{ animationDelay: "150ms" }}
-                              ></div>
-                              <div
-                                className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
-                                style={{ animationDelay: "300ms" }}
-                              ></div>
-                            </div>
-                            <span className="text-sm text-gray-400">Analyzing costs...</span>
-                          </div>
+                    <div className="flex items-start gap-3 animate-slide-up">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center flex-shrink-0 mt-1 animate-pulse">
+                        <Sparkles className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center mb-1">
+                          <span className="text-sm font-medium text-white">AI Cost Optimizer</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Loader2 className="h-4 w-4 text-emerald-400 animate-spin" />
+                          <span className="text-sm text-gray-400">Analyzing your request...</span>
                         </div>
                       </div>
                     </div>
@@ -340,20 +456,20 @@ export default function ChatInterface() {
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-[#2a2a2a] bg-[#0f0f0f] p-4">
+        <div className="border-t border-[#2a2a2a]/50 bg-[#0f0f0f]/70 backdrop-blur-md p-4 z-10">
           <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
             <div className="relative">
               <Input
                 value={input}
                 onChange={handleInputChange}
                 placeholder="Ask about AI costs, LLM selection, ROI calculations..."
-                className="w-full bg-[#1a1a1a] border-[#2a2a2a] text-white placeholder-gray-400 pr-12 py-3 text-base rounded-xl focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                className="w-full bg-[#1a1a1a]/50 border-[#2a2a2a]/50 text-white placeholder-gray-400 pr-14 py-5 text-base rounded-full focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 shadow-lg"
                 disabled={isLoading}
               />
               <Button
                 type="submit"
                 disabled={!input.trim() || isLoading}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-600 rounded-lg"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 w-9 p-0 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 disabled:from-gray-600 disabled:to-gray-700 rounded-full shadow-lg shadow-emerald-900/20 transition-all"
               >
                 <Send className="h-4 w-4" />
               </Button>
@@ -364,6 +480,177 @@ export default function ChatInterface() {
           </form>
         </div>
       </div>
+
+      <style jsx global>{`
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+          margin-top: 1.5rem;
+          margin-bottom: 1rem;
+          font-weight: 600;
+          line-height: 1.25;
+          background: linear-gradient(to right, #10b981, #059669);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+        
+        .markdown-content h1 {
+          font-size: 1.5rem;
+        }
+        
+        .markdown-content h2 {
+          font-size: 1.25rem;
+        }
+        
+        .markdown-content h3 {
+          font-size: 1.125rem;
+        }
+        
+        .markdown-content p {
+          margin-bottom: 1rem;
+        }
+        
+        .markdown-content ul, .markdown-content ol {
+          margin-bottom: 1rem;
+          padding-left: 1.5rem;
+        }
+        
+        .markdown-content li {
+          margin-bottom: 0.25rem;
+          position: relative;
+        }
+        
+        .markdown-content ul li::before {
+          content: "";
+          position: absolute;
+          left: -1rem;
+          top: 0.5rem;
+          width: 0.375rem;
+          height: 0.375rem;
+          background-color: #10b981;
+          border-radius: 50%;
+        }
+        
+        .markdown-content a {
+          color: #10b981;
+          text-decoration: underline;
+          transition: all 0.2s;
+        }
+        
+        .markdown-content a:hover {
+          color: #059669;
+        }
+        
+        .markdown-content blockquote {
+          border-left: 3px solid #10b981;
+          padding-left: 1rem;
+          color: #d1d5db;
+          margin: 1rem 0;
+          background: rgba(16, 185, 129, 0.05);
+          border-radius: 0.25rem;
+          padding: 0.5rem 1rem;
+        }
+        
+        .markdown-content pre {
+          background-color: rgba(30, 30, 30, 0.7);
+          padding: 1rem;
+          border-radius: 0.75rem;
+          overflow-x: auto;
+          margin: 1rem 0;
+          border: 1px solid rgba(42, 42, 42, 0.7);
+        }
+        
+        .markdown-content code {
+          background-color: rgba(30, 30, 30, 0.7);
+          padding: 0.2rem 0.4rem;
+          border-radius: 0.25rem;
+          font-size: 0.875rem;
+          border: 1px solid rgba(42, 42, 42, 0.7);
+        }
+        
+        .markdown-content pre code {
+          background-color: transparent;
+          padding: 0;
+          border: none;
+        }
+        
+        .markdown-content table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 1rem 0;
+          border-radius: 0.5rem;
+          overflow: hidden;
+        }
+        
+        .markdown-content th {
+          background-color: rgba(16, 185, 129, 0.1);
+          color: #d1d5db;
+          font-weight: 600;
+          padding: 0.75rem;
+          text-align: left;
+          border-bottom: 1px solid rgba(42, 42, 42, 0.7);
+        }
+        
+        .markdown-content td {
+          padding: 0.75rem;
+          border-bottom: 1px solid rgba(42, 42, 42, 0.7);
+        }
+        
+        .markdown-content tr:last-child td {
+          border-bottom: none;
+        }
+        
+        .markdown-content tr:nth-child(even) {
+          background-color: rgba(255, 255, 255, 0.02);
+        }
+        
+        .markdown-content strong {
+          color: #f3f4f6;
+          font-weight: 600;
+        }
+        
+        .markdown-content em {
+          color: #d1d5db;
+          font-style: italic;
+        }
+        
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes scale-in {
+          from { 
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to { 
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        
+        @keyframes slide-up {
+          from { 
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to { 
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out forwards;
+        }
+        
+        .animate-scale-in {
+          animation: scale-in 0.3s ease-out forwards;
+        }
+        
+        .animate-slide-up {
+          animation: slide-up 0.3s ease-out forwards;
+        }
+      `}</style>
     </div>
   )
 }
