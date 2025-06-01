@@ -23,33 +23,26 @@ def chat():
         data = request.json
         messages = data.get('messages', [])
         
-        # Extract the last user message
-        last_user_message = None
-        for message in reversed(messages):
-            if message.get('role') == 'user':
-                last_user_message = message.get('content')
-                break
-        
-        if not last_user_message:
-            return jsonify({"error": "No user message found"}), 400
+        if not messages:
+            return jsonify({"error": "No messages found"}), 400
 
-        # Just pass the user message directly to Gemini without adding system context
-        prompt = last_user_message
+        # Convert our messages format to Gemini's format
+        gemini_messages = []
         
-        # Call Gemini API
+        # Add all the conversation messages
+        for message in messages:
+            role = "user" if message.get('role') == 'user' else "model"
+            gemini_messages.append({
+                "role": role,
+                "parts": [{"text": message.get('content', '')}]
+            })
+        
+        # Call Gemini API with the full conversation history
         response = requests.post(
             f"{GEMINI_API_URL}?key={GEMINI_API_KEY}",
             headers={"Content-Type": "application/json"},
             json={
-                "contents": [
-                    {
-                        "parts": [
-                            {
-                                "text": prompt
-                            }
-                        ]
-                    }
-                ]
+                "contents": gemini_messages
             }
         )
         

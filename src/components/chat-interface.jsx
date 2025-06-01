@@ -93,11 +93,93 @@ export default function ChatInterface() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null)
   const [copiedMsgId, setCopiedMsgId] = useState(null)
   const [animateNewMessage, setAnimateNewMessage] = useState(false)
+  const [currentChatId, setCurrentChatId] = useState(null)
+  const [sidebarWidth, setSidebarWidth] = useState(288) // Default width (72 * 4 = 288px)
+  const [isResizing, setIsResizing] = useState(false)
   
   // Use our custom Flask chat hook instead of the AI SDK hook
   const { messages, input, handleInputChange, handleSubmit, isLoading, setMessages } = useFlaskChat()
   const messagesEndRef = useRef(null)
   const scrollAreaRef = useRef(null)
+  const sidebarRef = useRef(null)
+
+  // Load chat history and current chat ID from localStorage on mount
+  useEffect(() => {
+    const savedChatHistory = localStorage.getItem('chatHistory')
+    if (savedChatHistory) {
+      try {
+        const parsedChatHistory = JSON.parse(savedChatHistory)
+        setChatHistory(parsedChatHistory)
+        
+        // Get current chat ID
+        const savedCurrentChatId = localStorage.getItem('currentChatId')
+        if (savedCurrentChatId) {
+          setCurrentChatId(savedCurrentChatId)
+          
+          // Load messages for current chat
+          const currentChat = parsedChatHistory.find(chat => chat.id === savedCurrentChatId)
+          if (currentChat && currentChat.messages) {
+            setMessages(currentChat.messages)
+          }
+        } else {
+          // Generate a new chat ID if none exists
+          const newChatId = `chat_${Date.now()}`
+          setCurrentChatId(newChatId)
+          localStorage.setItem('currentChatId', newChatId)
+        }
+      } catch (error) {
+        console.error('Failed to parse saved chat history:', error)
+      }
+    } else {
+      // Generate a new chat ID if no history exists
+      const newChatId = `chat_${Date.now()}`
+      setCurrentChatId(newChatId)
+      localStorage.setItem('currentChatId', newChatId)
+    }
+  }, [setMessages])
+
+  // Save chat history to localStorage whenever it changes
+  useEffect(() => {
+    if (chatHistory.length > 0) {
+      localStorage.setItem('chatHistory', JSON.stringify(chatHistory))
+    }
+  }, [chatHistory])
+
+  // Update chat history when messages change
+  useEffect(() => {
+    if (currentChatId && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1]
+      const title = messages.find(m => m.role === 'user')?.content.slice(0, 30) + '...' || 'New Chat'
+      const preview = lastMessage.content.slice(0, 40) + '...'
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      
+      setChatHistory(prev => {
+        const existingChatIndex = prev.findIndex(chat => chat.id === currentChatId)
+        
+        if (existingChatIndex >= 0) {
+          // Update existing chat
+          const updatedHistory = [...prev]
+          updatedHistory[existingChatIndex] = {
+            ...updatedHistory[existingChatIndex],
+            title,
+            preview,
+            time,
+            messages: [...messages]
+          }
+          return updatedHistory
+        } else {
+          // Add new chat
+          return [...prev, {
+            id: currentChatId,
+            title,
+            preview,
+            time,
+            messages: [...messages]
+          }]
+        }
+      })
+    }
+  }, [messages, currentChatId])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -112,17 +194,86 @@ export default function ChatInterface() {
   }, [messages])
 
   const handleDeleteChat = (chatId) => {
-    setChatHistory(prev => prev.filter(chat => chat.id !== chatId))
+    // Stop event propagation to prevent chat selection
+    
+    // Remove the chat from history
+    const updatedHistory = chatHistory.filter(chat => chat.id !== chatId)
+    setChatHistory(updatedHistory)
+    
+    // If deleting the current chat, create a new one
+    if (chatId === currentChatId) {
+      handleNewChat()
+    }
+    
+    // Also update localStorage
+    if (updatedHistory.length === 0) {
+      localStorage.removeItem('chatHistory')
+    } else {
+      localStorage.setItem('chatHistory', JSON.stringify(updatedHistory))
+    }
+    
+    setShowDeleteConfirm(null)
+  }
+
+  const handleDeleteAllChats = () => {
+    setChatHistory([])
+    localStorage.removeItem('chatHistory')
+    handleNewChat()
     setShowDeleteConfirm(null)
   }
 
   const handleClearCurrentChat = () => {
     setMessages([])
+    
+    // Update the chat history
+    setChatHistory(prev => {
+      const existingChatIndex = prev.findIndex(chat => chat.id === currentChatId)
+      if (existingChatIndex >= 0) {
+        const updatedHistory = [...prev]
+        updatedHistory[existingChatIndex] = {
+          ...updatedHistory[existingChatIndex],
+          messages: []
+        }
+        return updatedHistory
+      }
+      return prev
+    })
+    
     setShowDeleteConfirm(null)
   }
 
   const handleNewChat = () => {
+    // Save current chat to history if it has messages
+    if (messages.length > 0) {
+      // Already handled by the useEffect
+    }
+    
+    // Create new chat ID
+    const newChatId = `chat_${Date.now()}`
+    setCurrentChatId(newChatId)
+    localStorage.setItem('currentChatId', newChatId)
+    
+    // Clear messages
     setMessages([])
+  }
+
+  const handleLoadChat = (chatId) => {
+    // Save current chat if needed
+    if (messages.length > 0) {
+      // Already handled by the useEffect
+    }
+    
+    // Set current chat ID
+    setCurrentChatId(chatId)
+    localStorage.setItem('currentChatId', chatId)
+    
+    // Load messages
+    const chat = chatHistory.find(c => c.id === chatId)
+    if (chat && chat.messages) {
+      setMessages(chat.messages)
+    } else {
+      setMessages([])
+    }
   }
 
   const handleCopyText = (text, messageId) => {
@@ -150,6 +301,59 @@ export default function ChatInterface() {
     },
   ]
 
+  // Toggle sidebar with proper state management
+  const toggleSidebar = () => {
+    const newState = !sidebarOpen
+    setSidebarOpen(newState)
+    // Store sidebar preference in localStorage
+    localStorage.setItem('sidebarOpen', newState)
+  }
+
+  // Load sidebar preference and width on mount
+  useEffect(() => {
+    const savedSidebarState = localStorage.getItem('sidebarOpen')
+    if (savedSidebarState !== null) {
+      setSidebarOpen(savedSidebarState === 'true')
+    }
+    
+    const savedSidebarWidth = localStorage.getItem('sidebarWidth')
+    if (savedSidebarWidth !== null) {
+      setSidebarWidth(parseInt(savedSidebarWidth))
+    }
+  }, [])
+  
+  // Handle sidebar resizing
+  const handleMouseDown = (e) => {
+    e.preventDefault()
+    setIsResizing(true)
+  }
+  
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isResizing) return
+      
+      const newWidth = e.clientX
+      if (newWidth >= 240 && newWidth <= 400) {
+        setSidebarWidth(newWidth)
+      }
+    }
+    
+    const handleMouseUp = () => {
+      setIsResizing(false)
+      localStorage.setItem('sidebarWidth', sidebarWidth.toString())
+    }
+    
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+    }
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isResizing, sidebarWidth])
+
   return (
     <div className="flex h-screen bg-[#0f0f0f] text-white">
       {/* Animated Background */}
@@ -170,13 +374,16 @@ export default function ChatInterface() {
               <div>
                 <h3 className="font-semibold text-white">Delete Chat</h3>
                 <p className="text-sm text-gray-400">
-                  {showDeleteConfirm === 'current' ? 'Clear current conversation?' : 'Delete this conversation?'}
+                  {showDeleteConfirm === 'current' ? 'Clear current conversation?' : 
+                   showDeleteConfirm === 'all' ? 'Delete all conversations?' : 'Delete this conversation?'}
                 </p>
               </div>
             </div>
             <p className="text-gray-300 mb-6">
               {showDeleteConfirm === 'current' 
                 ? 'This will clear all messages in the current conversation. This action cannot be undone.'
+                : showDeleteConfirm === 'all'
+                ? 'All your conversations will be permanently deleted. This action cannot be undone.'
                 : 'This conversation will be permanently deleted. This action cannot be undone.'
               }
             </p>
@@ -192,6 +399,8 @@ export default function ChatInterface() {
                 onClick={() => {
                   if (showDeleteConfirm === 'current') {
                     handleClearCurrentChat()
+                  } else if (showDeleteConfirm === 'all') {
+                    handleDeleteAllChats()
                   } else {
                     handleDeleteChat(showDeleteConfirm)
                   }
@@ -207,24 +416,24 @@ export default function ChatInterface() {
 
       {/* Sidebar */}
       <div
-        className={`${
-          sidebarOpen ? "w-72" : "w-0"
-        } transition-all duration-300 overflow-hidden bg-[#0f0f0f]/70 backdrop-blur-md border-r border-[#2a2a2a]/50 shadow-xl z-10`}
+        ref={sidebarRef}
+        style={{ width: sidebarOpen ? `${sidebarWidth}px` : '0px' }}
+        className={`relative flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden bg-[#0f0f0f]/90 backdrop-blur-md border-r border-[#2a2a2a]/50 shadow-xl z-20`}
       >
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
-          <div className="p-4 border-b border-[#2a2a2a]/50">
+          <div className="p-4 border-b border-[#2a2a2a]/50 bg-[#0f0f0f]/50 backdrop-blur-md sticky top-0 z-10">
             <Button 
               onClick={handleNewChat}
               className="w-full justify-start gap-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white border-none rounded-lg h-11 font-medium transition-all shadow-lg shadow-emerald-900/20"
             >
               <Plus className="h-4 w-4" />
-              New analysis
+              New chat
             </Button>
           </div>
 
           {/* Chat History */}
-          <ScrollArea className="flex-1 p-2">
+          <ScrollArea className="flex-1 p-2 overflow-y-auto">
             <div className="space-y-1">
               {chatHistory.length === 0 ? (
                 <div className="p-8 text-center text-gray-500 text-sm flex flex-col items-center">
@@ -238,24 +447,27 @@ export default function ChatInterface() {
                 chatHistory.map((chat) => (
                   <div
                     key={chat.id}
-                    className="group relative p-3 rounded-lg hover:bg-[#2a2a2a] cursor-pointer transition-all"
+                    className={`group relative p-3 rounded-lg hover:bg-[#2a2a2a] cursor-pointer transition-all ${chat.id === currentChatId ? 'bg-[#2a2a2a]/70 border-l-2 border-emerald-500' : ''}`}
+                    onClick={() => handleLoadChat(chat.id)}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate mb-1">{chat.title}</p>
-                        <p className="text-xs text-gray-400 truncate">{chat.preview}</p>
+                    <div className="flex items-start gap-2">
+                      <div className="w-8 h-8 rounded-full bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
+                        <Sparkles className="h-4 w-4 text-emerald-400" />
                       </div>
-                      <div className="flex items-center gap-1 ml-2">
-                        <span className="text-xs text-gray-500">{chat.time}</span>
-                        <div className="relative">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white truncate mb-1">{chat.title || "New Chat"}</p>
+                        <p className="text-xs text-gray-400 truncate">{chat.preview || "No messages yet"}</p>
+                        <div className="flex items-center gap-1 mt-1">
+                          <span className="text-xs text-gray-500">{chat.time}</span>
+                          <div className="flex-1"></div>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={(e) => {
-                              e.stopPropagation()
-                              setShowDeleteConfirm(chat.id)
+                              e.stopPropagation();
+                              setShowDeleteConfirm(chat.id);
                             }}
-                            className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0 hover:bg-red-500/20 hover:text-red-400 transition-all"
+                            className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0 hover:bg-red-500/20 hover:text-red-400 transition-all rounded-full"
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
@@ -269,41 +481,51 @@ export default function ChatInterface() {
           </ScrollArea>
 
           {/* Sidebar Footer */}
-          <div className="p-4 border-t border-[#2a2a2a]/50">
+          <div className="p-4 border-t border-[#2a2a2a]/50 bg-[#0f0f0f]/50 backdrop-blur-md sticky bottom-0 z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#2a2a2a] cursor-pointer">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
                   <Sparkles className="h-4 w-4 text-white" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium">AI Cost Optimizer</p>
-                  <p className="text-xs text-gray-400">Enterprise plan</p>
+                  <p className="text-sm font-medium">AI Chat</p>
+                  <p className="text-xs text-gray-400">Powered by Gemini</p>
                 </div>
               </div>
-              <Link href="/">
+              {chatHistory.length > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-9 px-3 text-gray-400 hover:text-emerald-400 hover:bg-[#2a2a2a] transition-all flex items-center gap-2"
+                  onClick={() => setShowDeleteConfirm('all')}
+                  className="h-9 px-3 text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all flex items-center gap-2"
                 >
-                  <Home className="h-4 w-4" />
-                  <span className="text-sm">Home</span>
+                  <Trash2 className="h-4 w-4" />
                 </Button>
-              </Link>
+              )}
             </div>
           </div>
         </div>
+        
+        {/* Resize Handle */}
+        {sidebarOpen && (
+          <div
+            className="absolute top-0 right-0 w-1 h-full cursor-ew-resize hover:bg-emerald-500/50 group"
+            onMouseDown={handleMouseDown}
+          >
+            <div className="absolute top-1/2 right-0 h-8 w-1 -translate-y-1/2 bg-[#2a2a2a]/50 group-hover:bg-emerald-500 transition-colors"></div>
+          </div>
+        )}
       </div>
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col relative overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[#2a2a2a]/50 bg-[#0f0f0f]/70 backdrop-blur-md z-10">
+        <div className="flex items-center justify-between p-4 bg-[#0f0f0f]/90 backdrop-blur-md z-10 border-b border-[#2a2a2a]/50 sticky top-0">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={toggleSidebar}
               className="text-gray-400 hover:text-white hover:bg-[#2a2a2a] h-8 w-8 p-0"
             >
               <Menu className="h-4 w-4" />
@@ -312,7 +534,7 @@ export default function ChatInterface() {
               <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-900/20">
                 <Sparkles className="h-3 w-3 text-white" />
               </div>
-              <span className="font-medium text-white">AI Cost Optimizer</span>
+              <span className="font-medium text-white">AI Chat</span>
             </div>
           </div>
           
@@ -456,7 +678,7 @@ export default function ChatInterface() {
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-[#2a2a2a]/50 bg-[#0f0f0f]/70 backdrop-blur-md p-4 z-10">
+        <div className="bg-[#0f0f0f]/70 backdrop-blur-md p-4 z-10">
           <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
             <div className="relative">
               <Input
@@ -474,9 +696,6 @@ export default function ChatInterface() {
                 <Send className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-xs text-gray-500 text-center mt-2">
-              AI Cost Optimizer can make mistakes. Please verify important cost calculations.
-            </p>
           </form>
         </div>
       </div>
