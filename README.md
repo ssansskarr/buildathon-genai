@@ -74,9 +74,6 @@ Railway will automatically detect the Next.js application and deploy it using th
 
 **Note**: Since we use `output: standalone` in Next.js config, the application runs with `node .next/standalone/server.js`.
 
-## Project Philosophy
-This platform was built with the understanding that the gap between AI technical capabilities and business decision-making is one of the biggest challenges organizations face today. We focused on creating a bridge that doesn't compromise on either technical accuracy or business clarity.
-The time-constrained development environment of the Buildathon Challenge pushed us to prioritize what truly matters: delivering a deployable, evolving solution that serves both technical and business audiences effectively.
 
 ## License
 
