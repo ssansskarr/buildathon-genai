@@ -28,6 +28,12 @@ const useFlaskChat = () => {
 
   const handleInputChange = (e) => {
     setInput(e.target.value)
+    
+    // Auto-resize the textarea if it's the event target
+    if (e.target.tagName.toLowerCase() === 'textarea') {
+      e.target.style.height = 'auto'
+      e.target.style.height = Math.min(200, e.target.scrollHeight) + 'px'
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -85,9 +91,9 @@ const useFlaskChat = () => {
         // Race the fetch against the timeout
         const response = await Promise.race([
           fetch(apiEndpoint, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
               "Accept": "application/json"
             },
             body: JSON.stringify(payload),
@@ -112,14 +118,14 @@ const useFlaskChat = () => {
           console.error("Error parsing JSON response:", parseError)
           throw new Error(`Failed to parse response: ${parseError.message}`)
         }
-        
-        if (response.ok) {
+      
+      if (response.ok) {
           // Generate a unique ID for the new message
           const newMessageId = Date.now() + 1
           
-          // Add AI response to the chat
-          setMessages((prev) => [
-            ...prev,
+        // Add AI response to the chat
+        setMessages((prev) => [
+          ...prev,
             { 
               id: newMessageId.toString(), 
               role: "assistant", 
@@ -129,14 +135,14 @@ const useFlaskChat = () => {
           
           // Set the last new message ID to trigger typewriter effect
           setLastNewMessageId(newMessageId.toString())
-        } else {
+      } else {
           console.error("Error from backend:", data.error || response.statusText)
-          // Add error message
-          setMessages((prev) => [
-            ...prev,
-            { 
-              id: (Date.now() + 1).toString(), 
-              role: "assistant", 
+        // Add error message
+        setMessages((prev) => [
+          ...prev,
+          { 
+            id: (Date.now() + 1).toString(), 
+            role: "assistant", 
               content: `Sorry, I encountered an error: ${data.error || response.statusText || "Unknown error"}` 
             }
           ])
@@ -163,15 +169,15 @@ const useFlaskChat = () => {
         console.error("Failed in main try-catch:", error)
         console.error("Error details:", JSON.stringify(error, Object.getOwnPropertyNames(error)))
         
-        // Add error message
-        setMessages((prev) => [
-          ...prev,
-          { 
-            id: (Date.now() + 1).toString(), 
-            role: "assistant", 
+      // Add error message
+      setMessages((prev) => [
+        ...prev,
+        { 
+          id: (Date.now() + 1).toString(), 
+          role: "assistant", 
             content: "Sorry, I couldn't process your request. Error: " + error.message
-          }
-        ])
+        }
+      ])
       }
     } finally {
       setIsLoading(false)
@@ -1446,17 +1452,24 @@ export default function ChatInterface() {
         <div className="bg-card/70 backdrop-blur-md p-4 z-10">
           <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
             <div className="relative">
-              <Input
+              <textarea
                 value={input}
                 onChange={handleInputChange}
                 placeholder="Ask about AI investment alignment, LLM selection, ROI, business impact..."
-                className="w-full bg-secondary/50 border-border text-foreground placeholder-muted-foreground pr-14 py-5 text-base rounded-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-lg"
+                className="w-full bg-secondary/50 border-border text-foreground placeholder-muted-foreground pr-14 py-5 px-5 text-base rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-lg resize-none overflow-hidden min-h-[56px] max-h-[200px]"
                 disabled={isLoading}
+                rows={1}
+                style={{ height: 'auto' }}
+                onInput={(e) => {
+                  // Auto-resize the textarea based on content
+                  e.target.style.height = 'auto';
+                  e.target.style.height = Math.min(200, e.target.scrollHeight) + 'px';
+                }}
               />
               <Button
                 type="submit"
                 disabled={!input.trim() || isLoading}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 w-9 p-0 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-700 rounded-full shadow-lg shadow-blue-900/20 transition-all"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 h-9 w-9 p-0 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-700 rounded-full shadow-lg shadow-blue-900/20 transition-all"
               >
                 <Send className="h-4 w-4" />
               </Button>
@@ -1483,6 +1496,14 @@ export default function ChatInterface() {
         
         .animate-pulse-text {
           animation: pulse-text 1.5s infinite;
+        }
+        
+        /* Input textarea styles */
+        textarea {
+          white-space: pre-wrap;
+          overflow-wrap: break-word;
+          word-wrap: break-word;
+          word-break: break-word;
         }
         
         /* Improve text wrapping for long content */
