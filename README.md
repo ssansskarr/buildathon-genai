@@ -45,22 +45,6 @@ python app.py
 
 For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
-## Railway Deployment
-
-This application can be deployed on Railway. Follow these steps:
-
-1. Create a new project in Railway
-2. Connect your GitHub repository
-3. Set up the following environment variables:
-   - `NEXT_PUBLIC_API_URL`: URL of your backend service (e.g., https://buildathon-genai-production.up.railway.app)
-   - `NODE_ENV`: set to `production`
-4. When prompted to generate a service domain, use port `8080` (not 3000)
-5. Deploy the service
-
-Railway will automatically detect the Next.js application and deploy it using the configuration in `railway.json` and `Procfile`.
-
-**Note**: Since we use `output: standalone` in Next.js config, the application runs with `node .next/standalone/server.js`.
-
 ## License
 
 This project is proprietary and not licensed for public use.

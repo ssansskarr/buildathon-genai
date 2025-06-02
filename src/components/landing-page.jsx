@@ -255,7 +255,7 @@ export default function LandingPage() {
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                       </svg>
-                    </div>
+                      </div>
                     <div>
                       <h3 className="text-lg font-semibold">AIlign Advisor</h3>
                       <p className="text-sm text-gray-400">Intelligent AI investment guidance</p>
@@ -272,7 +272,7 @@ export default function LandingPage() {
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                       </svg>
-                    </div>
+                        </div>
                     <div className="bg-[#1a2035] rounded-lg p-3 text-sm">
                       <p>Which LLM should we use for our customer service AI that balances cost and quality?</p>
                     </div>

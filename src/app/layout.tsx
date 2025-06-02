@@ -55,7 +55,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300`}
       >
         <ThemeProvider>
-          {children}
+        {children}
         </ThemeProvider>
       </body>
     </html>

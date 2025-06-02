@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, after_this_request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 import os
@@ -9,10 +9,10 @@ load_dotenv()
 
 # Define environment variables directly in code as a fallback
 ENV_VARS = {
-    "LYZR_API_KEY": "sk-default-Nlyl5TvJQfPqT6inYtuWx8kaiBa9VCeH",
-    "LYZR_AGENT_ID": "683cc9869bef0c4bbc19754b",
-    "LYZR_USER_ID": "pavankalvakota@gmail.com",
-    "LYZR_SESSION_ID": "683cc9869bef0c4bbc19754b-zi98tnx8gy",
+    "LYZR_API_KEY": "sk-default-4nIJzEOtOeXpFjIu3U9wDyUD5U4V49h4",
+    "LYZR_AGENT_ID": "683d10bb3b7c57f1745cfaf9",
+    "LYZR_USER_ID": "pavansharadha@gmail.com",
+    "LYZR_SESSION_ID": "683d10bb3b7c57f1745cfaf9-e0fqnfekgs",
     "GEMINI_API_KEY": "AIzaSyARVFZ6ub0Q6vfJATOLg1ew4TrNlJiL9vE"
 }
 
@@ -22,16 +22,8 @@ def get_env(key):
 
 app = Flask(__name__)
 
-# Setup CORS to allow requests from any origin - this is necessary for Render
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
-
-# Add CORS headers to all responses
-@app.after_request
-def add_cors_headers(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-    return response
+# Create a more permissive CORS configuration
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
 
 # Lyzr Agent Studio API configuration
 LYZR_API_KEY = get_env("LYZR_API_KEY")
@@ -191,13 +183,13 @@ def chat():
         
         # Call Lyzr Agent Studio API
         try:
-        response = requests.post(
+            response = requests.post(
                 LYZR_API_URL,
                 headers={
                     "Content-Type": "application/json",
                     "x-api-key": LYZR_API_KEY
                 },
-            json={
+                json={
                     "user_id": LYZR_USER_ID,
                     "agent_id": LYZR_AGENT_ID,
                     "session_id": LYZR_SESSION_ID,
@@ -207,15 +199,15 @@ def chat():
             )
             
             print(f"Lyzr API response status: {response.status_code}")
-        
-        # Process the response
-        if response.status_code == 200:
+            
+            # Process the response
+            if response.status_code == 200:
                 lyzr_response = response.json()
                 # Extract the response text from Lyzr's response
-            try:
+                try:
                     ai_text = lyzr_response.get('response', '')
-                if not ai_text:
-                    ai_text = "I couldn't generate a response. Please try again."
+                    if not ai_text:
+                        ai_text = "I couldn't generate a response. Please try again."
                         print("Empty response from Lyzr API")
                     else:
                         # Enhance the response using Google Gemini
@@ -226,10 +218,10 @@ def chat():
                         ai_text = cleanup_meta_commentary(ai_text)
                 except (KeyError, IndexError) as e:
                     print(f"Error parsing Lyzr response: {str(e)}")
-                ai_text = "Error parsing the AI response. Please try again."
-                
-            return jsonify({"response": ai_text})
-        else:
+                    ai_text = "Error parsing the AI response. Please try again."
+                    
+                return jsonify({"response": ai_text})
+            else:
                 error_msg = f"Lyzr API Error: {response.status_code}"
                 print(f"{error_msg} - {response.text}")
                 return jsonify({"error": error_msg, "details": response.text}), 500
@@ -242,6 +234,14 @@ def chat():
         error_msg = f"Server error processing request: {str(e)}"
         print(error_msg)
         return jsonify({"error": error_msg}), 500
+
+@app.route('/api/chat', methods=['OPTIONS'])
+def chat_options():
+    response = jsonify({'status': 'success'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
 
 @app.route('/health', methods=['GET'])
 def health_check():
