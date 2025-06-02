@@ -21,8 +21,9 @@ def get_env(key):
     return os.environ.get(key, ENV_VARS.get(key))
 
 app = Flask(__name__)
-# Update CORS to accept requests from Vercel and localhost
-CORS(app, origins=["https://buildathon-genai.vercel.app", "https://buildathon-genai-production.vercel.app", "http://localhost:3000"], supports_credentials=True)
+
+# Create a more permissive CORS configuration
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
 
 # Lyzr Agent Studio API configuration
 LYZR_API_KEY = get_env("LYZR_API_KEY")
@@ -233,6 +234,14 @@ def chat():
         error_msg = f"Server error processing request: {str(e)}"
         print(error_msg)
         return jsonify({"error": error_msg}), 500
+
+@app.route('/api/chat', methods=['OPTIONS'])
+def chat_options():
+    response = jsonify({'status': 'success'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
 
 @app.route('/health', methods=['GET'])
 def health_check():
