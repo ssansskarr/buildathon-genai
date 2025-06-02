@@ -203,7 +203,7 @@ def chat():
                     "session_id": LYZR_SESSION_ID,
                     "message": user_message
                 },
-                timeout=30
+                timeout=90
             )
             
             print(f"Lyzr API response status: {response.status_code}")

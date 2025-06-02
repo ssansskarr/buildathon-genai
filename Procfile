@@ -1,1 +1,1 @@
-web: gunicorn flask_backend.app:app 
+web: cd flask_backend && gunicorn --chdir . app:app --timeout 120 --workers 2 

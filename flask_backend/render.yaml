@@ -3,7 +3,7 @@ services:
     name: ailign-backend
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn app:app --timeout 120 --workers 2
     plan: free
     envVars:
       - key: LYZR_API_KEY

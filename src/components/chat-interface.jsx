@@ -81,53 +81,74 @@ const useFlaskChat = () => {
         signal: abortController.signal
       })
 
-      const data = await response.json()
+      // Parse the response as JSON
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error("Error parsing JSON:", jsonError);
+        throw new Error("Failed to parse response from server");
+      }
+      
+      // Generate a unique ID for the new message
+      const newMessageId = Date.now() + 1;
       
       if (response.ok) {
-        // Generate a unique ID for the new message
-        const newMessageId = Date.now() + 1
-        
         // Add AI response to the chat
         setMessages((prev) => [
           ...prev,
-          { id: newMessageId.toString(), role: "assistant", content: data.response || data.text || "No response received" }
-        ])
+          { 
+            id: newMessageId.toString(), 
+            role: "assistant", 
+            content: data.response || data.text || "No response received" 
+          }
+        ]);
         
         // Set the last new message ID to trigger typewriter effect
-        setLastNewMessageId(newMessageId.toString())
+        setLastNewMessageId(newMessageId.toString());
       } else {
-        console.error("Error from backend:", data.error)
-        // Add error message
+        console.error("Error from backend:", data.error);
+        // Add error message with any response content if available
         setMessages((prev) => [
           ...prev,
           { 
-            id: (Date.now() + 1).toString(), 
+            id: newMessageId.toString(), 
             role: "assistant", 
-            content: `Sorry, I encountered an error: ${data.error || "Unknown error"}` 
+            content: data.response || `Sorry, I encountered an error: ${data.error || "Unknown error"}` 
           }
-        ])
+        ]);
+        
+        // Set the last new message ID to trigger typewriter effect
+        setLastNewMessageId(newMessageId.toString());
       }
     } catch (error) {
       // Don't show error message if the request was aborted intentionally
       if (error.name === 'AbortError') {
-        console.log('Request was aborted')
+        console.log('Request was aborted');
       } else {
-        console.error("Failed to fetch from backend:", error)
-      // Add error message
-      setMessages((prev) => [
-        ...prev,
-        { 
-          id: (Date.now() + 1).toString(), 
-          role: "assistant", 
-            content: "Sorry, I couldn't connect to the backend service. Please check if the server is running." 
-        }
-      ])
+        console.error("Failed to fetch from backend:", error);
+        
+        // Generate a unique ID for the new message
+        const newMessageId = Date.now() + 1;
+        
+        // Add error message
+        setMessages((prev) => [
+          ...prev,
+          { 
+            id: newMessageId.toString(), 
+            role: "assistant", 
+            content: "Sorry, I couldn't connect to the backend service. Please try again later." 
+          }
+        ]);
+        
+        // Set the last new message ID to trigger typewriter effect
+        setLastNewMessageId(newMessageId.toString());
       }
     } finally {
-      setIsLoading(false)
-      setController(null)
-      setIsInterruptible(false)
-      setProcessingStage(0) // Reset processing stage
+      setIsLoading(false);
+      setController(null);
+      setIsInterruptible(false);
+      setProcessingStage(0); // Reset processing stage
     }
   }
 
