@@ -22,7 +22,7 @@ def get_env(key):
 
 app = Flask(__name__)
 # Update CORS to accept requests from Vercel and localhost
-CORS(app, origins=["*"], supports_credentials=True)  # Allow all origins for now, can be restricted later
+CORS(app, origins=["https://buildathon-genai.vercel.app", "http://localhost:3000"], supports_credentials=True)
 
 # Lyzr Agent Studio API configuration
 LYZR_API_KEY = get_env("LYZR_API_KEY")
