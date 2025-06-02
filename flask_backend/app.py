@@ -191,13 +191,13 @@ def chat():
         
         # Call Lyzr Agent Studio API
         try:
-            response = requests.post(
+        response = requests.post(
                 LYZR_API_URL,
                 headers={
                     "Content-Type": "application/json",
                     "x-api-key": LYZR_API_KEY
                 },
-                json={
+            json={
                     "user_id": LYZR_USER_ID,
                     "agent_id": LYZR_AGENT_ID,
                     "session_id": LYZR_SESSION_ID,
@@ -207,15 +207,15 @@ def chat():
             )
             
             print(f"Lyzr API response status: {response.status_code}")
-            
-            # Process the response
-            if response.status_code == 200:
+        
+        # Process the response
+        if response.status_code == 200:
                 lyzr_response = response.json()
                 # Extract the response text from Lyzr's response
-                try:
+            try:
                     ai_text = lyzr_response.get('response', '')
-                    if not ai_text:
-                        ai_text = "I couldn't generate a response. Please try again."
+                if not ai_text:
+                    ai_text = "I couldn't generate a response. Please try again."
                         print("Empty response from Lyzr API")
                     else:
                         # Enhance the response using Google Gemini
@@ -226,10 +226,10 @@ def chat():
                         ai_text = cleanup_meta_commentary(ai_text)
                 except (KeyError, IndexError) as e:
                     print(f"Error parsing Lyzr response: {str(e)}")
-                    ai_text = "Error parsing the AI response. Please try again."
-                    
-                return jsonify({"response": ai_text})
-            else:
+                ai_text = "Error parsing the AI response. Please try again."
+                
+            return jsonify({"response": ai_text})
+        else:
                 error_msg = f"Lyzr API Error: {response.status_code}"
                 print(f"{error_msg} - {response.text}")
                 return jsonify({"error": error_msg, "details": response.text}), 500

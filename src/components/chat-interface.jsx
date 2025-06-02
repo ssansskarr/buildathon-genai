@@ -28,12 +28,6 @@ const useFlaskChat = () => {
 
   const handleInputChange = (e) => {
     setInput(e.target.value)
-    
-    // Auto-resize the textarea if it's the event target
-    if (e.target.tagName.toLowerCase() === 'textarea') {
-      e.target.style.height = 'auto'
-      e.target.style.height = Math.min(200, e.target.scrollHeight) + 'px'
-    }
   }
 
   const handleSubmit = async (e) => {
@@ -1365,7 +1359,7 @@ export default function ChatInterface() {
                       {message.role === "user" ? (
                         <div className="flex justify-end mb-2">
                           <div className="max-w-[85%] px-4 py-2 bg-secondary/50 rounded-t-2xl rounded-bl-2xl text-foreground">
-                            <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                            <p className="whitespace-pre-wrap">{message.content}</p>
                           </div>
                         </div>
                       ) : (
@@ -1390,7 +1384,7 @@ export default function ChatInterface() {
                                 </Button>
                               )}
                             </div>
-                            <div className="markdown-content text-foreground leading-relaxed break-words">
+                            <div className="markdown-content text-foreground leading-relaxed">
                               {(idx === messages.length - 1 && message.id === lastNewMessageId && !isInitialLoad) ? (
                                 <TypeWriter 
                                   text={message.content} 
@@ -1452,24 +1446,17 @@ export default function ChatInterface() {
         <div className="bg-card/70 backdrop-blur-md p-4 z-10">
           <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
             <div className="relative">
-              <textarea
+              <Input
                 value={input}
                 onChange={handleInputChange}
                 placeholder="Ask about AI investment alignment, LLM selection, ROI, business impact..."
-                className="w-full bg-secondary/50 border-border text-foreground placeholder-muted-foreground pr-14 py-5 px-5 text-base rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-lg resize-none overflow-hidden min-h-[56px] max-h-[200px]"
+                className="w-full bg-secondary/50 border-border text-foreground placeholder-muted-foreground pr-14 py-5 text-base rounded-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-lg"
                 disabled={isLoading}
-                rows={1}
-                style={{ height: 'auto' }}
-                onInput={(e) => {
-                  // Auto-resize the textarea based on content
-                  e.target.style.height = 'auto';
-                  e.target.style.height = Math.min(200, e.target.scrollHeight) + 'px';
-                }}
               />
               <Button
                 type="submit"
                 disabled={!input.trim() || isLoading}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 h-9 w-9 p-0 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-700 rounded-full shadow-lg shadow-blue-900/20 transition-all"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 w-9 p-0 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-700 rounded-full shadow-lg shadow-blue-900/20 transition-all"
               >
                 <Send className="h-4 w-4" />
               </Button>
@@ -1496,35 +1483,6 @@ export default function ChatInterface() {
         
         .animate-pulse-text {
           animation: pulse-text 1.5s infinite;
-        }
-        
-        /* Input textarea styles */
-        textarea {
-          white-space: pre-wrap;
-          overflow-wrap: break-word;
-          word-wrap: break-word;
-          word-break: break-word;
-        }
-        
-        /* Improve text wrapping for long content */
-        .markdown-content {
-          overflow-wrap: break-word;
-          word-wrap: break-word;
-          word-break: break-word;
-          hyphens: auto;
-        }
-        
-        .markdown-content * {
-          max-width: 100%;
-        }
-        
-        .markdown-content pre {
-          white-space: pre-wrap;
-          word-break: break-all;
-        }
-        
-        .markdown-content code {
-          word-break: break-all;
         }
         
         .markdown-content h1, .markdown-content h2, .markdown-content h3 {
