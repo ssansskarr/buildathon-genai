@@ -22,7 +22,7 @@ def get_env(key):
 
 app = Flask(__name__)
 # Update CORS to accept requests from Vercel and localhost
-CORS(app, origins=["https://buildathon-genai.vercel.app", "http://localhost:3000"], supports_credentials=True)
+CORS(app, origins=["https://buildathon-genai.vercel.app", "https://buildathon-genai-production.vercel.app", "http://localhost:3000"], supports_credentials=True)
 
 # Lyzr Agent Studio API configuration
 LYZR_API_KEY = get_env("LYZR_API_KEY")
@@ -165,6 +165,7 @@ def enhance_with_gemini(original_response, query):
 def chat():
     try:
         data = request.json
+        print(f"Received request data: {data}")
         messages = data.get('messages', [])
         
         if not messages:
@@ -177,45 +178,61 @@ def chat():
             return jsonify({"error": "No user message found"}), 400
             
         user_message = latest_user_message.get('content', '')
+        print(f"Processing user message: {user_message}")
         
         # Call Lyzr Agent Studio API
-        response = requests.post(
-            LYZR_API_URL,
-            headers={
-                "Content-Type": "application/json",
-                "x-api-key": LYZR_API_KEY
-            },
-            json={
-                "user_id": LYZR_USER_ID,
-                "agent_id": LYZR_AGENT_ID,
-                "session_id": LYZR_SESSION_ID,
-                "message": user_message
-            }
-        )
-        
-        # Process the response
-        if response.status_code == 200:
-            lyzr_response = response.json()
-            # Extract the response text from Lyzr's response
-            try:
-                ai_text = lyzr_response.get('response', '')
-                if not ai_text:
-                    ai_text = "I couldn't generate a response. Please try again."
-                else:
-                    # Enhance the response using Google Gemini
-                    ai_text = enhance_with_gemini(ai_text, user_message)
+        try:
+            response = requests.post(
+                LYZR_API_URL,
+                headers={
+                    "Content-Type": "application/json",
+                    "x-api-key": LYZR_API_KEY
+                },
+                json={
+                    "user_id": LYZR_USER_ID,
+                    "agent_id": LYZR_AGENT_ID,
+                    "session_id": LYZR_SESSION_ID,
+                    "message": user_message
+                },
+                timeout=30
+            )
+            
+            print(f"Lyzr API response status: {response.status_code}")
+            
+            # Process the response
+            if response.status_code == 200:
+                lyzr_response = response.json()
+                # Extract the response text from Lyzr's response
+                try:
+                    ai_text = lyzr_response.get('response', '')
+                    if not ai_text:
+                        ai_text = "I couldn't generate a response. Please try again."
+                        print("Empty response from Lyzr API")
+                    else:
+                        # Enhance the response using Google Gemini
+                        print("Enhancing response with Gemini")
+                        ai_text = enhance_with_gemini(ai_text, user_message)
+                        
+                        # Final cleanup to ensure no meta-commentary remains
+                        ai_text = cleanup_meta_commentary(ai_text)
+                except (KeyError, IndexError) as e:
+                    print(f"Error parsing Lyzr response: {str(e)}")
+                    ai_text = "Error parsing the AI response. Please try again."
                     
-                    # Final cleanup to ensure no meta-commentary remains
-                    ai_text = cleanup_meta_commentary(ai_text)
-            except (KeyError, IndexError):
-                ai_text = "Error parsing the AI response. Please try again."
-                
-            return jsonify({"response": ai_text})
-        else:
-            return jsonify({"error": f"API Error: {response.status_code}", "details": response.text}), 500
+                return jsonify({"response": ai_text})
+            else:
+                error_msg = f"Lyzr API Error: {response.status_code}"
+                print(f"{error_msg} - {response.text}")
+                return jsonify({"error": error_msg, "details": response.text}), 500
+        except Exception as api_err:
+            error_msg = f"Error calling Lyzr API: {str(api_err)}"
+            print(error_msg)
+            return jsonify({"error": error_msg}), 500
             
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        error_msg = f"Server error processing request: {str(e)}"
+        print(error_msg)
+        return jsonify({"error": error_msg}), 500
 
 @app.route('/health', methods=['GET'])
 def health_check():
