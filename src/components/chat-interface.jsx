@@ -46,62 +46,112 @@ const useFlaskChat = () => {
     setProcessingStage(1) // Reading query stage
 
     try {
-      // Wait 2 seconds for the first stage
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Wait 1 second for the first stage (reduced from 2)
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Move to analyzing knowledge base stage
-      setProcessingStage(2)
+      setProcessingStage(2);
       
       // Create an AbortController to allow cancelling the request
-      const abortController = new AbortController()
-      setController(abortController)
-      setIsInterruptible(true)
+      const abortController = new AbortController();
+      setController(abortController);
+      setIsInterruptible(true);
 
-      // Wait 4 seconds for the second stage
-      await new Promise(resolve => setTimeout(resolve, 4000))
+      // Wait 1 second for the second stage (reduced from 4)
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Move to generating response stage
-      setProcessingStage(3)
+      setProcessingStage(3);
 
-      // Wait 6 seconds for the third stage
-      await new Promise(resolve => setTimeout(resolve, 6000))
+      // Wait 1 second for the third stage (reduced from 6)
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Determine which API endpoint to use
-      const apiEndpoint = "https://buildathon-genai.onrender.com/api/chat";
+      const apiEndpoint = "https://buildathon-genai.onrender.com/api/chat"
+      console.log("Attempting to fetch from:", apiEndpoint)
 
-      // Call backend API
-      const response = await fetch(apiEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
-        signal: abortController.signal
-      })
-
-      const data = await response.json()
-      
-      if (response.ok) {
-        // Generate a unique ID for the new message
-        const newMessageId = Date.now() + 1
+      try {
+        // Prepare request payload
+        const payload = {
+          messages: [...messages, userMessage]
+        }
+        console.log("Sending payload:", JSON.stringify(payload))
         
-        // Add AI response to the chat
-        setMessages((prev) => [
-          ...prev,
-          { id: newMessageId.toString(), role: "assistant", content: data.response || data.text || "No response received" }
-        ])
+        // Create a timeout promise
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error("Request timed out after 20 seconds")), 20000);
+        });
         
-        // Set the last new message ID to trigger typewriter effect
-        setLastNewMessageId(newMessageId.toString())
-      } else {
-        console.error("Error from backend:", data.error)
-        // Add error message
+        // Race the fetch against the timeout
+        const response = await Promise.race([
+          fetch(apiEndpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+            body: JSON.stringify(payload),
+            signal: abortController.signal,
+            mode: "cors"
+          }),
+          timeoutPromise
+        ]);
+        
+        console.log("Response received:", response.status, response.statusText)
+        
+        // Read response as text first
+        const textResponse = await response.text()
+        console.log("Raw response text:", textResponse)
+        
+        // Try to parse the text as JSON
+        let data
+        try {
+          data = JSON.parse(textResponse)
+          console.log("Parsed data:", data)
+        } catch (parseError) {
+          console.error("Error parsing JSON response:", parseError)
+          throw new Error(`Failed to parse response: ${parseError.message}`)
+        }
+        
+        if (response.ok) {
+          // Generate a unique ID for the new message
+          const newMessageId = Date.now() + 1
+          
+          // Add AI response to the chat
+          setMessages((prev) => [
+            ...prev,
+            { 
+              id: newMessageId.toString(), 
+              role: "assistant", 
+              content: data.response || data.text || "No response received" 
+            }
+          ])
+          
+          // Set the last new message ID to trigger typewriter effect
+          setLastNewMessageId(newMessageId.toString())
+        } else {
+          console.error("Error from backend:", data.error || response.statusText)
+          // Add error message
+          setMessages((prev) => [
+            ...prev,
+            { 
+              id: (Date.now() + 1).toString(), 
+              role: "assistant", 
+              content: `Sorry, I encountered an error: ${data.error || response.statusText || "Unknown error"}` 
+            }
+          ])
+        }
+      } catch (fetchError) {
+        console.error("Error in fetch operation:", fetchError)
+        console.error("Error details:", JSON.stringify(fetchError, Object.getOwnPropertyNames(fetchError)))
+        
+        // Add error message for fetch error
         setMessages((prev) => [
           ...prev,
           { 
             id: (Date.now() + 1).toString(), 
             role: "assistant", 
-            content: `Sorry, I encountered an error: ${data.error || "Unknown error"}` 
+            content: `Network error: ${fetchError.message}. Please check your connection or try again later.` 
           }
         ])
       }
@@ -110,16 +160,18 @@ const useFlaskChat = () => {
       if (error.name === 'AbortError') {
         console.log('Request was aborted')
       } else {
-        console.error("Failed to fetch from backend:", error)
-      // Add error message
-      setMessages((prev) => [
-        ...prev,
-        { 
-          id: (Date.now() + 1).toString(), 
-          role: "assistant", 
-            content: "Sorry, I couldn't connect to the backend service. Please check if the server is running." 
-        }
-      ])
+        console.error("Failed in main try-catch:", error)
+        console.error("Error details:", JSON.stringify(error, Object.getOwnPropertyNames(error)))
+        
+        // Add error message
+        setMessages((prev) => [
+          ...prev,
+          { 
+            id: (Date.now() + 1).toString(), 
+            role: "assistant", 
+            content: "Sorry, I couldn't process your request. Error: " + error.message
+          }
+        ])
       }
     } finally {
       setIsLoading(false)
@@ -1025,6 +1077,37 @@ export default function ChatInterface() {
     );
   };
 
+  // Add a test function to directly try the API
+  const testBackendConnection = async () => {
+    try {
+      console.log("Testing direct backend connection to Render...");
+      const testMessage = { role: "user", content: "Test message" };
+      const testResponse = await fetch("https://buildathon-genai.onrender.com/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages: [testMessage] }),
+      });
+      
+      console.log("Test response status:", testResponse.status);
+      const textData = await testResponse.text();
+      console.log("Test raw response:", textData);
+      
+      try {
+        const jsonData = JSON.parse(textData);
+        console.log("Test JSON data:", jsonData);
+        alert(`Test successful! Got response: ${jsonData.response ? jsonData.response.substring(0, 50) + "..." : "Empty response"}`);
+      } catch (e) {
+        console.error("Error parsing test JSON:", e);
+        alert(`Error parsing JSON: ${e.message}\nRaw data: ${textData.substring(0, 100)}...`);
+      }
+    } catch (e) {
+      console.error("Test connection error:", e);
+      alert(`Test connection failed: ${e.message}`);
+    }
+  };
+
   return (
     <div className="flex h-screen bg-background text-foreground">
       {/* Animated Background */}
@@ -1407,6 +1490,17 @@ export default function ChatInterface() {
                 className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 w-9 p-0 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-700 rounded-full shadow-lg shadow-blue-900/20 transition-all"
               >
                 <Send className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="mt-2 text-center">
+              <Button 
+                type="button" 
+                onClick={testBackendConnection}
+                variant="outline" 
+                size="sm"
+                className="text-xs"
+              >
+                Test Backend Connection
               </Button>
             </div>
           </form>

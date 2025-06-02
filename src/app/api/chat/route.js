@@ -44,6 +44,7 @@ export async function POST(request) {
     });
   } catch (error) {
     console.error('Error proxying to backend:', error);
+    console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
     // Also return CORS headers in error response
     return new NextResponse(
       JSON.stringify({ error: 'Failed to process request', details: error.message }),
