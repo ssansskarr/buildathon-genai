@@ -7,13 +7,13 @@ services:
     plan: free
     envVars:
       - key: LYZR_API_KEY
-        value: sk-default-Nlyl5TvJQfPqT6inYtuWx8kaiBa9VCeH
+        value: sk-default-4nIJzEOtOeXpFjIu3U9wDyUD5U4V49h4
       - key: LYZR_AGENT_ID
-        value: 683cc9869bef0c4bbc19754b
+        value: 683d10bb3b7c57f1745cfaf9
       - key: LYZR_USER_ID
-        value: pavankalvakota@gmail.com
+        value: pavansharadha@gmail.com
       - key: LYZR_SESSION_ID
-        value: 683cc9869bef0c4bbc19754b-zi98tnx8gy
+        value: 683d10bb3b7c57f1745cfaf9-e0fqnfekgs
       - key: GEMINI_API_KEY
         value: AIzaSyARVFZ6ub0Q6vfJATOLg1ew4TrNlJiL9vE
       - key: PORT

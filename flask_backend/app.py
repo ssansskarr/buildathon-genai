@@ -9,10 +9,10 @@ load_dotenv()
 
 # Define environment variables directly in code as a fallback
 ENV_VARS = {
-    "LYZR_API_KEY": "sk-default-Nlyl5TvJQfPqT6inYtuWx8kaiBa9VCeH",
-    "LYZR_AGENT_ID": "683cc9869bef0c4bbc19754b",
-    "LYZR_USER_ID": "pavankalvakota@gmail.com",
-    "LYZR_SESSION_ID": "683cc9869bef0c4bbc19754b-zi98tnx8gy",
+    "LYZR_API_KEY": "sk-default-4nIJzEOtOeXpFjIu3U9wDyUD5U4V49h4",
+    "LYZR_AGENT_ID": "683d10bb3b7c57f1745cfaf9",
+    "LYZR_USER_ID": "pavansharadha@gmail.com",
+    "LYZR_SESSION_ID": "683d10bb3b7c57f1745cfaf9-e0fqnfekgs",
     "GEMINI_API_KEY": "AIzaSyARVFZ6ub0Q6vfJATOLg1ew4TrNlJiL9vE"
 }
 
