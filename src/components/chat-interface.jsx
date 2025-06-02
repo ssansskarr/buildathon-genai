@@ -113,15 +113,15 @@ const useFlaskChat = () => {
         console.log('Request was aborted')
       } else {
         console.error("Failed to fetch from backend:", error)
-        // Add error message
-        setMessages((prev) => [
-          ...prev,
-          { 
-            id: (Date.now() + 1).toString(), 
-            role: "assistant", 
+      // Add error message
+      setMessages((prev) => [
+        ...prev,
+        { 
+          id: (Date.now() + 1).toString(), 
+          role: "assistant", 
             content: "Sorry, I couldn't connect to the backend service. Please check if the server is running." 
-          }
-        ])
+        }
+      ])
       }
     } finally {
       setIsLoading(false)
@@ -891,7 +891,7 @@ export default function ChatInterface() {
       if (!isResizing) return
       
       const newWidth = Math.max(260, Math.min(e.clientX, 420))
-      setSidebarWidth(newWidth)
+        setSidebarWidth(newWidth)
       
       // Update text display mode based on sidebar width
       if (newWidth < 300) {
@@ -992,8 +992,8 @@ export default function ChatInterface() {
       { num: 2, label: "Analyzing knowledge base" },
       { num: 3, label: "Generating response" }
     ];
-    
-    return (
+
+  return (
       <div className="flex items-start gap-3 animate-slide-up">
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0 mt-1">
           <Sparkles className="h-4 w-4 text-white" />

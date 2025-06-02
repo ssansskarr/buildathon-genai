@@ -1,57 +1,33 @@
-export async function POST(req) {
-  const { messages } = await req.json()
+import { NextResponse } from 'next/server';
 
-  // Extract the latest user message
-  const latestUserMessage = messages.findLast(m => m.role === "user")
-  
-  if (!latestUserMessage) {
-    return new Response(JSON.stringify({ error: "No user message found" }), { 
-      status: 400,
-      headers: { "Content-Type": "application/json" }
-    })
-  }
-
+export async function POST(request) {
   try {
-    // Get backend URL from environment variable, or use direct API if not available
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://agent-prod.studio.lyzr.ai/v3/inference/chat/"
-    const isDirectApi = !process.env.NEXT_PUBLIC_BACKEND_URL
+    const data = await request.json();
     
-    // Call backend API
-    const response = await fetch(isDirectApi ? backendUrl : `${backendUrl}/api/chat`, {
-      method: "POST",
+    // Determine which API endpoint to use
+    const apiEndpoint = process.env.NODE_ENV === 'production'
+      ? process.env.NEXT_PUBLIC_API_URL || 'https://buildathon-genai-production.up.railway.app'
+      : 'http://localhost:5000';
+    
+    const response = await fetch(`${apiEndpoint}/api/chat`, {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        ...(isDirectApi && { "x-api-key": "sk-default-jr9mnUxXOtQcDnWvmVokUtgvmcC5YqHv" })
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(isDirectApi ? {
-        "user_id": "sanskar.gupta.22cse@bmu.edu.in",
-        "agent_id": "683cd9a4e5bd32ccbe646960",
-        "session_id": "683cd9a4e5bd32ccbe646960-sj5l6qjdxo",
-        "message": latestUserMessage.content
-      } : {
-        messages
-      })
-    })
-    
-    const data = await response.json()
+      body: JSON.stringify(data),
+    });
     
     if (!response.ok) {
-      return new Response(JSON.stringify({ error: data.error || "API Error" }), { 
-        status: 500,
-        headers: { "Content-Type": "application/json" }
-      })
+      throw new Error(`API error: ${response.status}`);
     }
     
-    // Return the AI response
-    return new Response(JSON.stringify({ 
-      response: isDirectApi ? data.response : data.response 
-    }), {
-      headers: { "Content-Type": "application/json" }
-    })
+    const result = await response.json();
+    return NextResponse.json(result);
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { 
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    })
+    console.error('Error proxying to backend:', error);
+    return NextResponse.json(
+      { error: 'Failed to process request' },
+      { status: 500 }
+    );
   }
 }

@@ -9,10 +9,10 @@ load_dotenv()
 
 # Define environment variables directly in code as a fallback
 ENV_VARS = {
-    "LYZR_API_KEY": "sk-default-jr9mnUxXOtQcDnWvmVokUtgvmcC5YqHv",
-    "LYZR_AGENT_ID": "683cd9a4e5bd32ccbe646960",
-    "LYZR_USER_ID": "sanskar.gupta.22cse@bmu.edu.in",
-    "LYZR_SESSION_ID": "683cd9a4e5bd32ccbe646960-sj5l6qjdxo",
+    "LYZR_API_KEY": "sk-default-Nlyl5TvJQfPqT6inYtuWx8kaiBa9VCeH",
+    "LYZR_AGENT_ID": "683cc9869bef0c4bbc19754b",
+    "LYZR_USER_ID": "pavankalvakota@gmail.com",
+    "LYZR_SESSION_ID": "683cc9869bef0c4bbc19754b-zi98tnx8gy",
     "GEMINI_API_KEY": "AIzaSyARVFZ6ub0Q6vfJATOLg1ew4TrNlJiL9vE"
 }
 
@@ -22,7 +22,7 @@ def get_env(key):
 
 app = Flask(__name__)
 # Update CORS to accept requests from Vercel and localhost
-CORS(app, origins=["https://*.vercel.app", "http://localhost:3000"])  # Add your Vercel domain when known
+CORS(app, origins=["*"], supports_credentials=True)  # Allow all origins for now, can be restricted later
 
 # Lyzr Agent Studio API configuration
 LYZR_API_KEY = get_env("LYZR_API_KEY")
