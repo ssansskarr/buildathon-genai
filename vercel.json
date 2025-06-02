@@ -5,7 +5,7 @@
     "rewrites": [
       {
         "source": "/api/:path*",
-        "destination": "https://buildathon-genai-production.up.railway.app/api/:path*"
+        "destination": "https://buildathon-genai.onrender.com/api/:path*"
       }
     ],
     "headers": [

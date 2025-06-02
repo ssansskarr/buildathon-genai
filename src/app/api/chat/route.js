@@ -5,9 +5,9 @@ export async function POST(request) {
     const data = await request.json();
     console.log('Request data:', data);
     
-    // Use environment variable or fallback to the Railway URL
+    // Use environment variable or fallback to the Render URL
     const apiEndpoint = process.env.NEXT_PUBLIC_API_URL || 
-                       'https://buildathon-genai-production.up.railway.app';
+                       'https://buildathon-genai.onrender.com';
     
     console.log(`Using API endpoint: ${apiEndpoint}`);
     

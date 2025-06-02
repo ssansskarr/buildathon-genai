@@ -2,12 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   async rewrites() {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://buildathon-genai.onrender.com';
     return [
       {
         source: '/api/:path*',
-        destination: process.env.NODE_ENV === 'production'
-          ? 'https://buildathon-genai-production.up.railway.app/api/:path*'
-          : 'http://localhost:5000/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },
@@ -33,13 +32,6 @@ const nextConfig = {
     ];
   },
   output: 'standalone',
-  swcMinify: true,
-  onDemandEntries: {
-    // Keep pages in memory for longer in development
-    maxInactiveAge: 25 * 1000,
-    // Number of pages to be kept in memory
-    pagesBufferLength: 4,
-  },
   experimental: {
     // Better error handling and logging
     largePageDataBytes: 128 * 1000, // 128KB
