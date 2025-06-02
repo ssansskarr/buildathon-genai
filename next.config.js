@@ -2,7 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://buildathon-genai.onrender.com';
+    // Hardcoded backend URL
+    const backendUrl = 'https://buildathon-genai.onrender.com';
     return [
       {
         source: '/api/:path*',

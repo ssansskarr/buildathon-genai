@@ -5,14 +5,10 @@ export async function POST(request) {
     const data = await request.json();
     console.log('Request data:', data);
     
-    // Use environment variable or fallback to the Render URL
-    const apiEndpoint = process.env.NEXT_PUBLIC_API_URL || 
-                       'https://buildathon-genai.onrender.com';
+    // Hardcoded backend URL
+    const apiEndpoint = 'https://buildathon-genai.onrender.com';
     
-    console.log(`Using API endpoint: ${apiEndpoint}`);
-    
-    // Make the request to the backend with specific headers
-    console.log(`Making request to: ${apiEndpoint}/api/chat`);
+    console.log(`Making direct request to: ${apiEndpoint}/api/chat`);
     const response = await fetch(`${apiEndpoint}/api/chat`, {
       method: 'POST',
       headers: {

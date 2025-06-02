@@ -67,9 +67,7 @@ const useFlaskChat = () => {
       await new Promise(resolve => setTimeout(resolve, 6000))
 
       // Determine which API endpoint to use
-      const apiEndpoint = window.location.hostname === 'localhost' 
-        ? "http://localhost:5000/api/chat"  // Local development
-        : "/api/chat";                      // Production (Next.js API route)
+      const apiEndpoint = "https://buildathon-genai.onrender.com/api/chat";
 
       // Call backend API
       const response = await fetch(apiEndpoint, {
