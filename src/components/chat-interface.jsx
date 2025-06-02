@@ -1077,37 +1077,6 @@ export default function ChatInterface() {
     );
   };
 
-  // Add a test function to directly try the API
-  const testBackendConnection = async () => {
-    try {
-      console.log("Testing direct backend connection to Render...");
-      const testMessage = { role: "user", content: "Test message" };
-      const testResponse = await fetch("https://buildathon-genai.onrender.com/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ messages: [testMessage] }),
-      });
-      
-      console.log("Test response status:", testResponse.status);
-      const textData = await testResponse.text();
-      console.log("Test raw response:", textData);
-      
-      try {
-        const jsonData = JSON.parse(textData);
-        console.log("Test JSON data:", jsonData);
-        alert(`Test successful! Got response: ${jsonData.response ? jsonData.response.substring(0, 50) + "..." : "Empty response"}`);
-      } catch (e) {
-        console.error("Error parsing test JSON:", e);
-        alert(`Error parsing JSON: ${e.message}\nRaw data: ${textData.substring(0, 100)}...`);
-      }
-    } catch (e) {
-      console.error("Test connection error:", e);
-      alert(`Test connection failed: ${e.message}`);
-    }
-  };
-
   return (
     <div className="flex h-screen bg-background text-foreground">
       {/* Animated Background */}
@@ -1490,17 +1459,6 @@ export default function ChatInterface() {
                 className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 w-9 p-0 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-700 rounded-full shadow-lg shadow-blue-900/20 transition-all"
               >
                 <Send className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="mt-2 text-center">
-              <Button 
-                type="button" 
-                onClick={testBackendConnection}
-                variant="outline" 
-                size="sm"
-                className="text-xs"
-              >
-                Test Backend Connection
               </Button>
             </div>
           </form>
