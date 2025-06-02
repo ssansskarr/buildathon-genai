@@ -10,6 +10,19 @@ AIlign is an intelligent advisor that helps businesses align their AI investment
 - **LLM Selection**: Get guidance on selecting the most appropriate LLM based on cost, quality, and latency
 - **PDF Export**: Download AI recommendations as professionally formatted PDF reports
 
+## What Sets AIlign Apart
+
+One thing we'd like to share is what really sets this platform apart, especially from our perspective as builders.
+
+We realized early on that AI tools often speak one language - either highly technical or overly simplified. So, we built ours to do both. Technical teams can dive into detailed cost models and performance metrics, while business stakeholders get clear, outcome-focused insights. No back-and-forth translation needed.
+
+We also made a conscious decision not to stop at a prototype. What we have is deployable in real-world environments, like a full-scale railway deployment, with no extra setup required. That constraint - building something real, not just presentable - kept us focused.
+
+And finally, the platform isn't static. It evolves with the AI landscape. If model prices drop or better ones come out, our recommendations adjust in real time. That means teams aren't making decisions based on outdated assumptions.
+
+At the core, our goal was to reduce the disconnect between technical capability and business goals. We think the time pressure actually helped - it made us focus only on what matters most.
+
+
 ## Technology Stack
 
 - **Frontend**: Next.js, React, Tailwind CSS
@@ -60,6 +73,10 @@ This application can be deployed on Railway. Follow these steps:
 Railway will automatically detect the Next.js application and deploy it using the configuration in `railway.json` and `Procfile`.
 
 **Note**: Since we use `output: standalone` in Next.js config, the application runs with `node .next/standalone/server.js`.
+
+## Project Philosophy
+This platform was built with the understanding that the gap between AI technical capabilities and business decision-making is one of the biggest challenges organizations face today. We focused on creating a bridge that doesn't compromise on either technical accuracy or business clarity.
+The time-constrained development environment of the Buildathon Challenge pushed us to prioritize what truly matters: delivering a deployable, evolving solution that serves both technical and business audiences effectively.
 
 ## License
 
