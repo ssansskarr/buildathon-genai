@@ -1359,7 +1359,7 @@ export default function ChatInterface() {
                       {message.role === "user" ? (
                         <div className="flex justify-end mb-2">
                           <div className="max-w-[85%] px-4 py-2 bg-secondary/50 rounded-t-2xl rounded-bl-2xl text-foreground">
-                            <p className="whitespace-pre-wrap">{message.content}</p>
+                            <p className="whitespace-pre-wrap break-words">{message.content}</p>
                           </div>
                         </div>
                       ) : (
@@ -1384,7 +1384,7 @@ export default function ChatInterface() {
                                 </Button>
                               )}
                             </div>
-                            <div className="markdown-content text-foreground leading-relaxed">
+                            <div className="markdown-content text-foreground leading-relaxed break-words">
                               {(idx === messages.length - 1 && message.id === lastNewMessageId && !isInitialLoad) ? (
                                 <TypeWriter 
                                   text={message.content} 
@@ -1483,6 +1483,27 @@ export default function ChatInterface() {
         
         .animate-pulse-text {
           animation: pulse-text 1.5s infinite;
+        }
+        
+        /* Improve text wrapping for long content */
+        .markdown-content {
+          overflow-wrap: break-word;
+          word-wrap: break-word;
+          word-break: break-word;
+          hyphens: auto;
+        }
+        
+        .markdown-content * {
+          max-width: 100%;
+        }
+        
+        .markdown-content pre {
+          white-space: pre-wrap;
+          word-break: break-all;
+        }
+        
+        .markdown-content code {
+          word-break: break-all;
         }
         
         .markdown-content h1, .markdown-content h2, .markdown-content h3 {
