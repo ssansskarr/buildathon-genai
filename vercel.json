@@ -5,10 +5,35 @@
     "rewrites": [
       {
         "source": "/api/:path*",
-        "destination": "https://buildathon-genai-production.up.railway.app/api/:path*"
+        "destination": "https://buildathon-genai.onrender.com/api/:path*"
       }
     ],
     "headers": [
+      {
+        "source": "/api/(.*)",
+        "headers": [
+          {
+            "key": "Access-Control-Allow-Origin",
+            "value": "*"
+          },
+          {
+            "key": "Access-Control-Allow-Methods",
+            "value": "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"
+          },
+          {
+            "key": "Access-Control-Allow-Headers",
+            "value": "X-Requested-With, Content-Type, Accept, Authorization"
+          },
+          {
+            "key": "Access-Control-Allow-Credentials",
+            "value": "true"
+          },
+          {
+            "key": "Access-Control-Max-Age",
+            "value": "86400"
+          }
+        ]
+      },
       {
         "source": "/(.*)",
         "headers": [
