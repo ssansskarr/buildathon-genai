@@ -3,8 +3,10 @@ services:
     name: ailign-backend
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: cd flask_backend && gunicorn --chdir . app:app --timeout 120 --workers 2
+    startCommand: gunicorn wsgi:app --timeout 180 --workers 2 --log-level debug
     plan: free
+    healthCheckPath: /health
+    healthCheckTimeout: 10000
     envVars:
       - key: LYZR_API_KEY
         value: sk-default-4nIJzEOtOeXpFjIu3U9wDyUD5U4V49h4

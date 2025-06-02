@@ -1,1 +1,1 @@
-web: cd flask_backend && gunicorn --chdir . app:app --timeout 120 --workers 2 
+web: gunicorn wsgi:app --timeout 180 --workers 2 --log-level debug 

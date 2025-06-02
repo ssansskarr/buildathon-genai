@@ -80,34 +80,48 @@ const useFlaskChat = () => {
         body: JSON.stringify({ messages: [...messages, userMessage] }),
         signal: abortController.signal
       })
-
-      // Parse the response as JSON
-      let data;
-      try {
-        data = await response.json();
-      } catch (jsonError) {
-        console.error("Error parsing JSON:", jsonError);
-        throw new Error("Failed to parse response from server");
-      }
       
       // Generate a unique ID for the new message
       const newMessageId = Date.now() + 1;
       
-      if (response.ok) {
+      // Parse the response as JSON
+      let data;
+      try {
+        data = await response.json();
+        console.log("Response data:", data);
+      } catch (jsonError) {
+        console.error("Error parsing JSON response:", jsonError);
+        
+        // Add error message
+        setMessages((prev) => [
+          ...prev,
+          { 
+            id: newMessageId.toString(), 
+            role: "assistant", 
+            content: "Sorry, I couldn't process your request. The server returned an invalid response." 
+          }
+        ]);
+        
+        // Set the last new message ID to trigger typewriter effect
+        setLastNewMessageId(newMessageId.toString());
+        return;
+      }
+      
+      // Check for response field in the data
+      if (data && data.response) {
         // Add AI response to the chat
         setMessages((prev) => [
           ...prev,
           { 
             id: newMessageId.toString(), 
             role: "assistant", 
-            content: data.response || data.text || "No response received" 
+            content: data.response 
           }
         ]);
         
         // Set the last new message ID to trigger typewriter effect
         setLastNewMessageId(newMessageId.toString());
-      } else {
-        console.error("Error from backend:", data.error);
+      } else if (data && data.error) {
         // Add error message with any response content if available
         setMessages((prev) => [
           ...prev,
@@ -115,6 +129,19 @@ const useFlaskChat = () => {
             id: newMessageId.toString(), 
             role: "assistant", 
             content: data.response || `Sorry, I encountered an error: ${data.error || "Unknown error"}` 
+          }
+        ]);
+        
+        // Set the last new message ID to trigger typewriter effect
+        setLastNewMessageId(newMessageId.toString());
+      } else {
+        // Fallback for unexpected response format
+        setMessages((prev) => [
+          ...prev,
+          { 
+            id: newMessageId.toString(), 
+            role: "assistant", 
+            content: "Sorry, I received an unexpected response format. Please try again." 
           }
         ]);
         

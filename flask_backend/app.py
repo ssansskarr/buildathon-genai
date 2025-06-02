@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, after_this_request
 from flask_cors import CORS
 import requests
 import os
+import json
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -146,7 +147,8 @@ def enhance_with_gemini(original_response, query):
         response = requests.post(
             f"{GEMINI_API_URL}?key={GEMINI_API_KEY}",
             headers=headers,
-            json=data
+            json=data,
+            timeout=90
         )
         
         # Process the response
@@ -173,18 +175,41 @@ def enhance_with_gemini(original_response, query):
 @app.route('/api/chat', methods=['POST'])
 def chat():
     try:
-        data = request.json
-        print(f"Received request data: {data}")
+        # First check if the request has JSON data
+        if not request.is_json:
+            print("Request does not contain valid JSON")
+            return jsonify({
+                "error": "Invalid request format",
+                "response": "I'm sorry, I couldn't process your request. Please ensure you're sending a valid JSON request."
+            }), 400
+            
+        # Try to parse the JSON data
+        try:
+            data = request.json
+            print(f"Received request data: {data}")
+        except Exception as json_err:
+            print(f"JSON parsing error: {str(json_err)}")
+            return jsonify({
+                "error": "Failed to parse JSON data",
+                "response": "I'm sorry, I couldn't process your request due to a JSON parsing error."
+            }), 400
+            
+        # Check if messages exist in the data
         messages = data.get('messages', [])
-        
         if not messages:
-            return jsonify({"error": "No messages found"}), 400
+            return jsonify({
+                "error": "No messages found",
+                "response": "I'm sorry, I couldn't find any messages in your request."
+            }), 400
 
         # Get the latest user message
         latest_user_message = next((m for m in reversed(messages) if m.get('role') == 'user'), None)
         
         if not latest_user_message:
-            return jsonify({"error": "No user message found"}), 400
+            return jsonify({
+                "error": "No user message found",
+                "response": "I'm sorry, I couldn't find a user message in your request."
+            }), 400
             
         user_message = latest_user_message.get('content', '')
         print(f"Processing user message: {user_message}")
@@ -210,9 +235,9 @@ def chat():
         
             # Process the response
             if response.status_code == 200:
-                lyzr_response = response.json()
-                # Extract the response text from Lyzr's response
                 try:
+                    lyzr_response = response.json()
+                    # Extract the response text from Lyzr's response
                     ai_text = lyzr_response.get('response', '')
                     if not ai_text:
                         ai_text = "I couldn't generate a response. Please try again."
@@ -224,24 +249,41 @@ def chat():
                         
                         # Final cleanup to ensure no meta-commentary remains
                         ai_text = cleanup_meta_commentary(ai_text)
-                except (KeyError, IndexError) as e:
+                except (KeyError, IndexError, json.JSONDecodeError) as e:
                     print(f"Error parsing Lyzr response: {str(e)}")
-                    ai_text = "Error parsing the AI response. Please try again."
+                    ai_text = "I apologize, but I encountered an error processing your request. Please try again."
                 
+                # Ensure we return a valid JSON response
                 return jsonify({"response": ai_text})
             else:
                 error_msg = f"Lyzr API Error: {response.status_code}"
                 print(f"{error_msg} - {response.text}")
-                return jsonify({"error": error_msg, "details": response.text}), 500
-        except Exception as api_err:
+                return jsonify({
+                    "error": error_msg,
+                    "details": response.text,
+                    "response": "I'm sorry, I encountered an error while processing your request. Please try again later."
+                }), 500
+        except requests.exceptions.Timeout:
+            print("Lyzr API request timed out")
+            return jsonify({
+                "error": "Request timed out",
+                "response": "I'm sorry, the request to our AI service timed out. Please try again with a simpler query."
+            }), 504
+        except requests.exceptions.RequestException as api_err:
             error_msg = f"Error calling Lyzr API: {str(api_err)}"
             print(error_msg)
-            return jsonify({"error": error_msg}), 500
+            return jsonify({
+                "error": error_msg,
+                "response": "I'm sorry, I encountered a connection error while processing your request. Please try again later."
+            }), 500
             
     except Exception as e:
         error_msg = f"Server error processing request: {str(e)}"
         print(error_msg)
-        return jsonify({"error": error_msg}), 500
+        return jsonify({
+            "error": error_msg,
+            "response": "I'm sorry, I encountered an unexpected error. Please try again later."
+        }), 500
 
 @app.route('/health', methods=['GET'])
 def health_check():
