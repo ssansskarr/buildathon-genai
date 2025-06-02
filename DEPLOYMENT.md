@@ -50,6 +50,37 @@ This approach makes deployment simpler but requires managing two repositories.
 
 6. Deploy the application.
 
+## Deploying the Frontend on Railway
+
+As an alternative to Vercel, you can also deploy the Next.js frontend on Railway.
+
+### Setting up Railway for Frontend Deployment
+
+1. Log in to your Railway account or create one at [railway.app](https://railway.app/)
+2. Create a new project
+3. Choose "Deploy from GitHub repo"
+4. Select your repository
+5. Configure the deployment:
+   - Environment Variables:
+     - `NEXT_PUBLIC_API_URL`: URL of your backend service (e.g., https://buildathon-genai-production.up.railway.app)
+     - `NODE_ENV`: set to `production`
+   - For the Service Domain setup, use port `8080` as Next.js listens on this port in the Railway environment
+   - Leave other settings at their defaults
+
+Railway will automatically detect the Next.js application and deploy it. When prompted about port configuration for your service domain, enter `8080`.
+
+**Note**: Since we're using `output: standalone` in Next.js configuration, the application is started using `node .next/standalone/server.js` instead of the usual `npm run start` command.
+
+### Connecting Frontend and Backend on Railway
+
+When both services are deployed on Railway, they can communicate with each other using Railway's internal network. You can link the services in the Railway dashboard:
+
+1. Go to your project in the Railway dashboard
+2. Navigate to the "Variables" section
+3. Create a new shared variable to connect the services
+
+This will allow the frontend and backend to communicate efficiently within Railway's network.
+
 ## Backend Deployment (Railway)
 
 1. Sign up for an account on [Railway](https://railway.app/).

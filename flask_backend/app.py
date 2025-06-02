@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, after_this_request
 from flask_cors import CORS
 import requests
 import os
@@ -22,8 +22,16 @@ def get_env(key):
 
 app = Flask(__name__)
 
-# Create a more permissive CORS configuration
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
+# Setup CORS to allow requests from any origin - this is necessary for Render
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+
+# Add CORS headers to all responses
+@app.after_request
+def add_cors_headers(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
 
 # Lyzr Agent Studio API configuration
 LYZR_API_KEY = get_env("LYZR_API_KEY")
@@ -234,14 +242,6 @@ def chat():
         error_msg = f"Server error processing request: {str(e)}"
         print(error_msg)
         return jsonify({"error": error_msg}), 500
-
-@app.route('/api/chat', methods=['OPTIONS'])
-def chat_options():
-    response = jsonify({'status': 'success'})
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-    return response
 
 @app.route('/health', methods=['GET'])
 def health_check():
