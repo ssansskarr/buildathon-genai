@@ -1,1 +1,1 @@
-web: node .next/standalone/server.js 
+web: cd flask_backend && gunicorn --chdir . app:app 
